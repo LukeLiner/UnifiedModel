@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "supplier.production_batch_produces_supplier.component_lot",
+    "display_name": {
+      "zh_cn": "生产批次到成品批次",
+      "en_us": "Batch Produces Component Lot"
+    },
+    "description": {
+      "zh_cn": "生产批次关联成品批次",
+      "en_us": "Batch produces component lot"
+    },
+    "domain": "supplier"
+  },
+  "spec": {
+    "src": {
+      "domain": "supplier",
+      "kind": "entity_set",
+      "name": "supplier.production_batch"
+    },
+    "dest": {
+      "domain": "supplier",
+      "kind": "entity_set",
+      "name": "supplier.component_lot"
+    },
+    "entity_link_type": "related_to"
+  }
+}

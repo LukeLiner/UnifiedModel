@@ -1,0 +1,116 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "automaker.warehouse",
+    "display_name": {
+      "zh_cn": "仓库",
+      "en_us": "Warehouse"
+    },
+    "description": {
+      "zh_cn": "仓库实体",
+      "en_us": "Warehouse entity"
+    },
+    "domain": "automaker"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "warehouse_id",
+        "display_name": {
+          "zh_cn": "仓库ID",
+          "en_us": "Warehouse ID"
+        },
+        "description": {
+          "zh_cn": "仓库编号",
+          "en_us": "Warehouse id"
+        },
+        "type": "string",
+        "example": "WH-EAST"
+      },
+      {
+        "name": "name",
+        "display_name": {
+          "zh_cn": "仓库名称",
+          "en_us": "Warehouse Name"
+        },
+        "description": {
+          "zh_cn": "仓库名称",
+          "en_us": "Warehouse name"
+        },
+        "type": "string",
+        "example": "华东成品库"
+      },
+      {
+        "name": "warehouse_name",
+        "display_name": {
+          "zh_cn": "仓库名称别名",
+          "en_us": "Warehouse Name Alias"
+        },
+        "description": {
+          "zh_cn": "仓库名称别名",
+          "en_us": "Warehouse display name"
+        },
+        "type": "string",
+        "example": "华东成品库"
+      },
+      {
+        "name": "region",
+        "display_name": {
+          "zh_cn": "区域",
+          "en_us": "Region"
+        },
+        "description": {
+          "zh_cn": "区域",
+          "en_us": "Region"
+        },
+        "type": "string",
+        "example": "华东"
+      },
+      {
+        "name": "capacity",
+        "display_name": {
+          "zh_cn": "容量",
+          "en_us": "Capacity"
+        },
+        "description": {
+          "zh_cn": "容量",
+          "en_us": "Capacity"
+        },
+        "type": "integer",
+        "example": 180
+      },
+      {
+        "name": "status",
+        "display_name": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "description": {
+          "zh_cn": "仓库状态",
+          "en_us": "Warehouse status"
+        },
+        "type": "string",
+        "example": "active"
+      }
+    ],
+    "primary_key_fields": [
+      "warehouse_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(warehouse_id as varbinary))))",
+    "name_fields": [
+      "warehouse_name",
+      "region",
+      "status"
+    ],
+    "ordered_fields": [
+      "name",
+      "region"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

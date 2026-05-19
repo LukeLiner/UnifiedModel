@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:unifiedmodel:mcp:tools.schema.json",
+  "title": "UModel MCP Tool and Resource Contract",
+  "type": "object",
+  "required": ["transports", "output_format", "mcp_methods", "tools", "resources"],
+  "properties": {
+    "transports": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["stdio", "streamable-http", "http+sse"]
+      }
+    },
+    "output_format": {
+      "type": "object",
+      "required": ["content_mime_type", "jsonrpc_envelope"],
+      "properties": {
+        "content_mime_type": {
+          "type": "string",
+          "const": "text/toon"
+        },
+        "jsonrpc_envelope": {
+          "type": "string",
+          "const": "application/json"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "mcp_methods": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "initialize",
+          "notifications/initialized",
+          "ping",
+          "logging/setLevel",
+          "tools/list",
+          "tools/call",
+          "resources/list",
+          "resources/templates/list",
+          "resources/read",
+          "prompts/list",
+          "prompts/get",
+          "completion/complete",
+          "discovery"
+        ]
+      }
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "enabled_by_default", "input_schema", "output_schema"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "query_spl_execute",
+              "query_spl_explain",
+              "query_spl_examples",
+              "umodel_validate",
+              "umodel_import",
+              "entity_write",
+              "entity_expire"
+            ]
+          },
+          "enabled_by_default": {
+            "type": "boolean"
+          },
+          "requires_explicit_write_enable": {
+            "type": "boolean",
+            "default": false
+          },
+          "input_schema": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "output_schema": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "kind", "uri_template", "read_only"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "overview",
+              "schema-index",
+              "query-templates",
+              "tool-capability-metadata"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "overview",
+              "schema-index",
+              "query-templates",
+              "tool-metadata"
+            ]
+          },
+          "uri_template": {
+            "type": "string",
+            "enum": [
+              "umodel://workspace/{workspace}/overview",
+              "umodel://workspace/{workspace}/schema-index",
+              "umodel://workspace/{workspace}/query-templates",
+              "umodel://workspace/{workspace}/tool-capability-metadata"
+            ]
+          },
+          "read_only": {
+            "type": "boolean",
+            "const": true
+          }
+        }
+      }
+    }
+  }
+}

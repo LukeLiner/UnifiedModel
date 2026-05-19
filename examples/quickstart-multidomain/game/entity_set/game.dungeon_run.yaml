@@ -1,0 +1,142 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "game.dungeon_run",
+    "display_name": {
+      "zh_cn": "副本运行",
+      "en_us": "Dungeon Run"
+    },
+    "description": {
+      "zh_cn": "副本运行实体",
+      "en_us": "Dungeon run entity"
+    },
+    "domain": "game"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "run_id",
+        "display_name": {
+          "zh_cn": "运行ID",
+          "en_us": "Run ID"
+        },
+        "description": {
+          "zh_cn": "运行ID",
+          "en_us": "Run id"
+        },
+        "type": "string",
+        "example": "RUN-1001"
+      },
+      {
+        "name": "character_id",
+        "display_name": {
+          "zh_cn": "角色ID",
+          "en_us": "Character ID"
+        },
+        "description": {
+          "zh_cn": "角色ID",
+          "en_us": "Character id"
+        },
+        "type": "string",
+        "example": "CHAR-001"
+      },
+      {
+        "name": "character_name",
+        "display_name": {
+          "zh_cn": "角色名",
+          "en_us": "Character Name"
+        },
+        "description": {
+          "zh_cn": "角色名",
+          "en_us": "Character name"
+        },
+        "type": "string",
+        "example": "游戏小王子"
+      },
+      {
+        "name": "server_id",
+        "display_name": {
+          "zh_cn": "区服ID",
+          "en_us": "Server ID"
+        },
+        "description": {
+          "zh_cn": "区服ID",
+          "en_us": "Server id"
+        },
+        "type": "string",
+        "example": "S1"
+      },
+      {
+        "name": "dungeon_name",
+        "display_name": {
+          "zh_cn": "副本名",
+          "en_us": "Dungeon Name"
+        },
+        "description": {
+          "zh_cn": "副本名",
+          "en_us": "Dungeon name"
+        },
+        "type": "string",
+        "example": "魔龙深渊"
+      },
+      {
+        "name": "run_count",
+        "display_name": {
+          "zh_cn": "次数",
+          "en_us": "Run Count"
+        },
+        "description": {
+          "zh_cn": "次数",
+          "en_us": "Run count"
+        },
+        "type": "integer",
+        "example": 3
+      },
+      {
+        "name": "loot_count",
+        "display_name": {
+          "zh_cn": "掉落数",
+          "en_us": "Loot Count"
+        },
+        "description": {
+          "zh_cn": "掉落数",
+          "en_us": "Loot count"
+        },
+        "type": "integer",
+        "example": 8
+      },
+      {
+        "name": "status",
+        "display_name": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "description": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "type": "string",
+        "example": "completed"
+      }
+    ],
+    "primary_key_fields": [
+      "run_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(run_id as varbinary))))",
+    "name_fields": [
+      "run_id",
+      "character_name",
+      "dungeon_name"
+    ],
+    "ordered_fields": [
+      "run_id",
+      "dungeon_name"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

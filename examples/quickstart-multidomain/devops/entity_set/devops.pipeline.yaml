@@ -1,0 +1,119 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "devops.pipeline"
+  domain: devops
+  display_name:
+    en_us: "Pipeline"
+    zh_cn: "流水线"
+  description:
+    en_us: "A delivery pipeline that builds and deploys services."
+    zh_cn: "构建和发布服务的交付流水线。"
+spec:
+  fields:
+    - name: id
+      type: string
+      display_name:
+        en_us: "ID"
+        zh_cn: "ID"
+      description:
+        en_us: "Stable entity identifier."
+        zh_cn: "稳定实体标识。"
+    - name: display_name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "名称"
+      description:
+        en_us: "Human-readable name."
+        zh_cn: "可读名称。"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Current lifecycle status."
+        zh_cn: "当前生命周期状态。"
+    - name: owner
+      type: string
+      display_name:
+        en_us: "Owner"
+        zh_cn: "负责人"
+      description:
+        en_us: "Owning team or person."
+        zh_cn: "负责人或团队。"
+    - name: environment
+      type: string
+      display_name:
+        en_us: "Environment"
+        zh_cn: "环境"
+      description:
+        en_us: "Runtime environment."
+        zh_cn: "运行环境。"
+    - name: trigger_type
+      type: string
+      display_name:
+        en_us: "Trigger Type"
+        zh_cn: "触发方式"
+      description:
+        en_us: "How the pipeline is triggered."
+        zh_cn: "流水线触发方式。"
+    - name: source_branch
+      type: string
+      display_name:
+        en_us: "Source Branch"
+        zh_cn: "源分支"
+      description:
+        en_us: "Primary source branch."
+        zh_cn: "主要源代码分支。"
+    - name: stage_count
+      type: integer
+      display_name:
+        en_us: "Stage Count"
+        zh_cn: "阶段数"
+      description:
+        en_us: "Number of pipeline stages."
+        zh_cn: "流水线阶段数量。"
+    - name: artifact_type
+      type: string
+      display_name:
+        en_us: "Artifact Type"
+        zh_cn: "制品类型"
+      description:
+        en_us: "Main build artifact type."
+        zh_cn: "主要构建制品类型。"
+    - name: deployment_strategy
+      type: string
+      display_name:
+        en_us: "Deployment Strategy"
+        zh_cn: "部署策略"
+      description:
+        en_us: "Default delivery strategy."
+        zh_cn: "默认交付策略。"
+    - name: last_run_result
+      type: string
+      display_name:
+        en_us: "Last Run Result"
+        zh_cn: "最近运行结果"
+      description:
+        en_us: "Result of the most recent pipeline run."
+        zh_cn: "最近一次流水线运行结果。"
+    - name: business_value
+      type: string
+      display_name:
+        en_us: "Business Value"
+        zh_cn: "业务价值"
+      description:
+        en_us: "Why this object matters."
+        zh_cn: "该对象的业务价值。"
+  primary_key_fields:
+    - id
+  id_generator: "id"
+  name_fields:
+    - display_name
+  ordered_fields: ["id", "display_name", "status", "owner", "environment", "trigger_type", "last_run_result"]
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

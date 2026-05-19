@@ -1,0 +1,23 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "devops.environment_maps_k8s.namespace"
+  domain: devops
+  display_name:
+    en_us: "Environment Maps Namespace"
+    zh_cn: "环境映射命名空间"
+  description:
+    en_us: "A DevOps environment maps to a Kubernetes namespace."
+    zh_cn: "DevOps 环境映射到 Kubernetes 命名空间。"
+spec:
+  src:
+    domain: devops
+    kind: entity_set
+    name: devops.environment
+  dest:
+    domain: k8s
+    kind: entity_set
+    name: k8s.namespace
+  entity_link_type: maps

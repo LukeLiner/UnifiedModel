@@ -1,0 +1,95 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "devops.incident"
+  domain: devops
+  display_name:
+    en_us: "Incident"
+    zh_cn: "故障"
+  description:
+    en_us: "A service-impacting incident tracked by the DevOps team."
+    zh_cn: "DevOps 团队跟踪的服务影响类故障。"
+spec:
+  fields:
+    - name: id
+      type: string
+      display_name:
+        en_us: "ID"
+        zh_cn: "ID"
+      description:
+        en_us: "Stable entity identifier."
+        zh_cn: "稳定实体标识。"
+    - name: display_name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "名称"
+      description:
+        en_us: "Human-readable name."
+        zh_cn: "可读名称。"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Current incident status."
+        zh_cn: "当前故障状态。"
+    - name: severity
+      type: string
+      display_name:
+        en_us: "Severity"
+        zh_cn: "严重等级"
+      description:
+        en_us: "Incident severity."
+        zh_cn: "故障严重等级。"
+    - name: impact
+      type: string
+      display_name:
+        en_us: "Impact"
+        zh_cn: "影响"
+      description:
+        en_us: "Observed business or user impact."
+        zh_cn: "观察到的业务或用户影响。"
+    - name: owner
+      type: string
+      display_name:
+        en_us: "Owner"
+        zh_cn: "负责人"
+      description:
+        en_us: "Incident commander or owning team."
+        zh_cn: "故障指挥人或责任团队。"
+    - name: detected_at
+      type: string
+      display_name:
+        en_us: "Detected At"
+        zh_cn: "发现时间"
+      description:
+        en_us: "Incident detection time."
+        zh_cn: "故障发现时间。"
+    - name: mitigation
+      type: string
+      display_name:
+        en_us: "Mitigation"
+        zh_cn: "止血动作"
+      description:
+        en_us: "Immediate mitigation action."
+        zh_cn: "即时止血动作。"
+    - name: root_cause
+      type: string
+      display_name:
+        en_us: "Root Cause"
+        zh_cn: "根因"
+      description:
+        en_us: "Known or suspected root cause."
+        zh_cn: "已知或疑似根因。"
+  primary_key_fields:
+    - id
+  id_generator: "id"
+  name_fields:
+    - display_name
+  ordered_fields: ["id", "display_name", "status", "severity", "impact", "owner"]
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

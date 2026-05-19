@@ -1,0 +1,103 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "k8s.ingress"
+  domain: k8s
+  display_name:
+    en_us: "Kubernetes Ingress"
+    zh_cn: "Kubernetes Ingress"
+  description:
+    en_us: "A coarse ingress endpoint that exposes services."
+    zh_cn: "暴露服务入口的粗粒度 Ingress。"
+spec:
+  fields:
+    - name: id
+      type: string
+      display_name:
+        en_us: "ID"
+        zh_cn: "ID"
+      description:
+        en_us: "Stable entity identifier."
+        zh_cn: "稳定实体标识。"
+    - name: display_name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "名称"
+      description:
+        en_us: "Human-readable name."
+        zh_cn: "可读名称。"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Current lifecycle status."
+        zh_cn: "当前生命周期状态。"
+    - name: host
+      type: string
+      display_name:
+        en_us: "Host"
+        zh_cn: "域名"
+      description:
+        en_us: "External host name."
+        zh_cn: "外部访问域名。"
+    - name: namespace
+      type: string
+      display_name:
+        en_us: "Namespace"
+        zh_cn: "命名空间"
+      description:
+        en_us: "Kubernetes namespace."
+        zh_cn: "Kubernetes 命名空间。"
+    - name: ingress_class
+      type: string
+      display_name:
+        en_us: "Ingress Class"
+        zh_cn: "Ingress 类"
+      description:
+        en_us: "Ingress controller class."
+        zh_cn: "Ingress 控制器类型。"
+    - name: tls_enabled
+      type: boolean
+      display_name:
+        en_us: "TLS Enabled"
+        zh_cn: "启用 TLS"
+      description:
+        en_us: "Whether TLS is enabled."
+        zh_cn: "是否启用 TLS。"
+    - name: path
+      type: string
+      display_name:
+        en_us: "Path"
+        zh_cn: "路径"
+      description:
+        en_us: "Primary route path."
+        zh_cn: "主要路由路径。"
+    - name: service_name
+      type: string
+      display_name:
+        en_us: "Service Name"
+        zh_cn: "服务名称"
+      description:
+        en_us: "Backend service name."
+        zh_cn: "后端服务名称。"
+    - name: certificate
+      type: string
+      display_name:
+        en_us: "Certificate"
+        zh_cn: "证书"
+      description:
+        en_us: "Referenced TLS certificate."
+        zh_cn: "引用的 TLS 证书。"
+  primary_key_fields:
+    - id
+  id_generator: "id"
+  name_fields:
+    - display_name
+  ordered_fields: ["id", "display_name", "status", "host", "namespace", "ingress_class", "tls_enabled"]
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

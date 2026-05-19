@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "supplier.material_lot_feeds_supplier.production_batch",
+    "display_name": {
+      "zh_cn": "原料批次到生产批次",
+      "en_us": "Material Lot Feeds Batch"
+    },
+    "description": {
+      "zh_cn": "原料批次关联生产批次",
+      "en_us": "Material lot feeds batch"
+    },
+    "domain": "supplier"
+  },
+  "spec": {
+    "src": {
+      "domain": "supplier",
+      "kind": "entity_set",
+      "name": "supplier.material_lot"
+    },
+    "dest": {
+      "domain": "supplier",
+      "kind": "entity_set",
+      "name": "supplier.production_batch"
+    },
+    "entity_link_type": "related_to"
+  }
+}

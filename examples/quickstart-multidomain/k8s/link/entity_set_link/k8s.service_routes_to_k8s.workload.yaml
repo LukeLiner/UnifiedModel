@@ -1,0 +1,23 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "k8s.service_routes_to_k8s.workload"
+  domain: k8s
+  display_name:
+    en_us: "Service Routes To Workload"
+    zh_cn: "服务路由到工作负载"
+  description:
+    en_us: "A Kubernetes service routes traffic to a workload."
+    zh_cn: "Kubernetes Service 将流量路由到工作负载。"
+spec:
+  src:
+    domain: k8s
+    kind: entity_set
+    name: k8s.service
+  dest:
+    domain: k8s
+    kind: entity_set
+    name: k8s.workload
+  entity_link_type: routes_to

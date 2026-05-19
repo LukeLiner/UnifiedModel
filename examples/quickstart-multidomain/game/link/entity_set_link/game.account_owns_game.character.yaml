@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "game.account_owns_game.character",
+    "display_name": {
+      "zh_cn": "账号拥有角色",
+      "en_us": "Account Owns Character"
+    },
+    "description": {
+      "zh_cn": "账号拥有角色",
+      "en_us": "Account owns character"
+    },
+    "domain": "game"
+  },
+  "spec": {
+    "src": {
+      "domain": "game",
+      "kind": "entity_set",
+      "name": "game.account"
+    },
+    "dest": {
+      "domain": "game",
+      "kind": "entity_set",
+      "name": "game.character"
+    },
+    "entity_link_type": "contains"
+  }
+}

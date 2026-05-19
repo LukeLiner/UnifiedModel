@@ -1,0 +1,103 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "automaker.dealer",
+    "display_name": {
+      "zh_cn": "经销商",
+      "en_us": "Dealer"
+    },
+    "description": {
+      "zh_cn": "经销商实体",
+      "en_us": "Dealer entity"
+    },
+    "domain": "automaker"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "dealer_id",
+        "display_name": {
+          "zh_cn": "经销商ID",
+          "en_us": "Dealer ID"
+        },
+        "description": {
+          "zh_cn": "经销商编号",
+          "en_us": "Dealer id"
+        },
+        "type": "string",
+        "example": "DLR-SH"
+      },
+      {
+        "name": "name",
+        "display_name": {
+          "zh_cn": "经销商名称",
+          "en_us": "Dealer Name"
+        },
+        "description": {
+          "zh_cn": "经销商名称",
+          "en_us": "Dealer name"
+        },
+        "type": "string",
+        "example": "上海旗舰店"
+      },
+      {
+        "name": "dealer_name",
+        "display_name": {
+          "zh_cn": "经销商名称别名",
+          "en_us": "Dealer Name Alias"
+        },
+        "description": {
+          "zh_cn": "经销商名称别名",
+          "en_us": "Dealer display name"
+        },
+        "type": "string",
+        "example": "上海旗舰店"
+      },
+      {
+        "name": "region",
+        "display_name": {
+          "zh_cn": "区域",
+          "en_us": "Region"
+        },
+        "description": {
+          "zh_cn": "区域",
+          "en_us": "Region"
+        },
+        "type": "string",
+        "example": "华东"
+      },
+      {
+        "name": "channel",
+        "display_name": {
+          "zh_cn": "渠道",
+          "en_us": "Channel"
+        },
+        "description": {
+          "zh_cn": "渠道",
+          "en_us": "Channel"
+        },
+        "type": "string",
+        "example": "direct"
+      }
+    ],
+    "primary_key_fields": [
+      "dealer_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(dealer_id as varbinary))))",
+    "name_fields": [
+      "dealer_name",
+      "region",
+      "channel"
+    ],
+    "ordered_fields": [
+      "name",
+      "region"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

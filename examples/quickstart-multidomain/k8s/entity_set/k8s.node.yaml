@@ -1,0 +1,119 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "k8s.node"
+  domain: k8s
+  display_name:
+    en_us: "Kubernetes Node"
+    zh_cn: "Kubernetes 节点"
+  description:
+    en_us: "A compute node that hosts workloads."
+    zh_cn: "承载工作负载的计算节点。"
+spec:
+  fields:
+    - name: id
+      type: string
+      display_name:
+        en_us: "ID"
+        zh_cn: "ID"
+      description:
+        en_us: "Stable entity identifier."
+        zh_cn: "稳定实体标识。"
+    - name: display_name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "名称"
+      description:
+        en_us: "Human-readable name."
+        zh_cn: "可读名称。"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Current lifecycle status."
+        zh_cn: "当前生命周期状态。"
+    - name: owner
+      type: string
+      display_name:
+        en_us: "Owner"
+        zh_cn: "负责人"
+      description:
+        en_us: "Owning team or person."
+        zh_cn: "负责人或团队。"
+    - name: cluster
+      type: string
+      display_name:
+        en_us: "Cluster"
+        zh_cn: "集群"
+      description:
+        en_us: "Related cluster."
+        zh_cn: "关联集群。"
+    - name: environment
+      type: string
+      display_name:
+        en_us: "Environment"
+        zh_cn: "环境"
+      description:
+        en_us: "Runtime environment."
+        zh_cn: "运行环境。"
+    - name: node_pool
+      type: string
+      display_name:
+        en_us: "Node Pool"
+        zh_cn: "节点池"
+      description:
+        en_us: "Node pool or scaling group."
+        zh_cn: "节点池或伸缩组。"
+    - name: instance_type
+      type: string
+      display_name:
+        en_us: "Instance Type"
+        zh_cn: "实例规格"
+      description:
+        en_us: "Compute instance type."
+        zh_cn: "计算实例规格。"
+    - name: zone
+      type: string
+      display_name:
+        en_us: "Zone"
+        zh_cn: "可用区"
+      description:
+        en_us: "Availability zone."
+        zh_cn: "可用区。"
+    - name: cpu_cores
+      type: integer
+      display_name:
+        en_us: "CPU Cores"
+        zh_cn: "CPU 核数"
+      description:
+        en_us: "Allocatable CPU cores."
+        zh_cn: "可分配 CPU 核数。"
+    - name: memory_gib
+      type: integer
+      display_name:
+        en_us: "Memory GiB"
+        zh_cn: "内存 GiB"
+      description:
+        en_us: "Allocatable memory in GiB."
+        zh_cn: "可分配内存 GiB。"
+    - name: business_value
+      type: string
+      display_name:
+        en_us: "Business Value"
+        zh_cn: "业务价值"
+      description:
+        en_us: "Why this object matters."
+        zh_cn: "该对象的业务价值。"
+  primary_key_fields:
+    - id
+  id_generator: "id"
+  name_fields:
+    - display_name
+  ordered_fields: ["id", "display_name", "status", "owner", "cluster", "node_pool", "instance_type"]
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

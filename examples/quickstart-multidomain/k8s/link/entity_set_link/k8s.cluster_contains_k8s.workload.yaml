@@ -1,0 +1,23 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "k8s.cluster_contains_k8s.workload"
+  domain: k8s
+  display_name:
+    en_us: "Cluster Contains Workload"
+    zh_cn: "集群包含工作负载"
+  description:
+    en_us: "A cluster contains workloads."
+    zh_cn: "集群包含工作负载。"
+spec:
+  src:
+    domain: k8s
+    kind: entity_set
+    name: k8s.cluster
+  dest:
+    domain: k8s
+    kind: entity_set
+    name: k8s.workload
+  entity_link_type: contains

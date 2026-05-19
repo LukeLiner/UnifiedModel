@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "game.character_runs_game.dungeon_run",
+    "display_name": {
+      "zh_cn": "角色运行副本",
+      "en_us": "Character Runs Dungeon"
+    },
+    "description": {
+      "zh_cn": "角色运行副本",
+      "en_us": "Character runs dungeon"
+    },
+    "domain": "game"
+  },
+  "spec": {
+    "src": {
+      "domain": "game",
+      "kind": "entity_set",
+      "name": "game.character"
+    },
+    "dest": {
+      "domain": "game",
+      "kind": "entity_set",
+      "name": "game.dungeon_run"
+    },
+    "entity_link_type": "related_to"
+  }
+}

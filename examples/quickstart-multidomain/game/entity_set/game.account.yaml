@@ -1,0 +1,142 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "game.account",
+    "display_name": {
+      "zh_cn": "账号",
+      "en_us": "Account"
+    },
+    "description": {
+      "zh_cn": "账号实体",
+      "en_us": "Account entity"
+    },
+    "domain": "game"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "account_id",
+        "display_name": {
+          "zh_cn": "账号ID",
+          "en_us": "Account ID"
+        },
+        "description": {
+          "zh_cn": "账号ID",
+          "en_us": "Account id"
+        },
+        "type": "string",
+        "example": "ACC-001"
+      },
+      {
+        "name": "account_name",
+        "display_name": {
+          "zh_cn": "账号名",
+          "en_us": "Account Name"
+        },
+        "description": {
+          "zh_cn": "账号名",
+          "en_us": "Account name"
+        },
+        "type": "string",
+        "example": "游戏小王子"
+      },
+      {
+        "name": "server_id",
+        "display_name": {
+          "zh_cn": "区服ID",
+          "en_us": "Server ID"
+        },
+        "description": {
+          "zh_cn": "区服ID",
+          "en_us": "Server id"
+        },
+        "type": "string",
+        "example": "S1"
+      },
+      {
+        "name": "server_name",
+        "display_name": {
+          "zh_cn": "区服名",
+          "en_us": "Server Name"
+        },
+        "description": {
+          "zh_cn": "区服名",
+          "en_us": "Server name"
+        },
+        "type": "string",
+        "example": "霸业一区"
+      },
+      {
+        "name": "risk_level",
+        "display_name": {
+          "zh_cn": "风险等级",
+          "en_us": "Risk Level"
+        },
+        "description": {
+          "zh_cn": "风险等级",
+          "en_us": "Risk level"
+        },
+        "type": "string",
+        "example": "medium"
+      },
+      {
+        "name": "online_status",
+        "display_name": {
+          "zh_cn": "在线状态",
+          "en_us": "Online Status"
+        },
+        "description": {
+          "zh_cn": "在线状态",
+          "en_us": "Online status"
+        },
+        "type": "string",
+        "example": "online"
+      },
+      {
+        "name": "last_risk_reason",
+        "display_name": {
+          "zh_cn": "最近风险原因",
+          "en_us": "Last Risk Reason"
+        },
+        "description": {
+          "zh_cn": "最近风险原因",
+          "en_us": "Last risk reason"
+        },
+        "type": "string",
+        "example": "continuous_session"
+      },
+      {
+        "name": "last_session_minutes",
+        "display_name": {
+          "zh_cn": "最近会话分钟数",
+          "en_us": "Last Session Minutes"
+        },
+        "description": {
+          "zh_cn": "最近会话分钟数",
+          "en_us": "Last session minutes"
+        },
+        "type": "integer",
+        "example": 180
+      }
+    ],
+    "primary_key_fields": [
+      "account_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(account_id as varbinary))))",
+    "name_fields": [
+      "account_name",
+      "server_name",
+      "risk_level"
+    ],
+    "ordered_fields": [
+      "account_name",
+      "risk_level"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

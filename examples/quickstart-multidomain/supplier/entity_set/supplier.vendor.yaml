@@ -1,0 +1,115 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "supplier.vendor",
+    "display_name": {
+      "zh_cn": "供应商",
+      "en_us": "Vendor"
+    },
+    "description": {
+      "zh_cn": "供应商实体",
+      "en_us": "Vendor entity"
+    },
+    "domain": "supplier"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "vendor_id",
+        "display_name": {
+          "zh_cn": "供应商ID",
+          "en_us": "Vendor ID"
+        },
+        "description": {
+          "zh_cn": "供应商ID",
+          "en_us": "Vendor id"
+        },
+        "type": "string",
+        "example": "VND-PC"
+      },
+      {
+        "name": "name",
+        "display_name": {
+          "zh_cn": "名称",
+          "en_us": "Name"
+        },
+        "description": {
+          "zh_cn": "供应商名称",
+          "en_us": "Vendor name"
+        },
+        "type": "string",
+        "example": "华南电芯"
+      },
+      {
+        "name": "vendor_name",
+        "display_name": {
+          "zh_cn": "供应商名称",
+          "en_us": "Vendor Name"
+        },
+        "description": {
+          "zh_cn": "供应商展示名称",
+          "en_us": "Vendor display name"
+        },
+        "type": "string",
+        "example": "华南电芯"
+      },
+      {
+        "name": "material_type",
+        "display_name": {
+          "zh_cn": "物料类型",
+          "en_us": "Material Type"
+        },
+        "description": {
+          "zh_cn": "物料类型",
+          "en_us": "Material type"
+        },
+        "type": "string",
+        "example": "cell"
+      },
+      {
+        "name": "region",
+        "display_name": {
+          "zh_cn": "区域",
+          "en_us": "Region"
+        },
+        "description": {
+          "zh_cn": "区域",
+          "en_us": "Region"
+        },
+        "type": "string",
+        "example": "华南"
+      },
+      {
+        "name": "status",
+        "display_name": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "description": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "type": "string",
+        "example": "active"
+      }
+    ],
+    "primary_key_fields": [
+      "vendor_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(vendor_id as varbinary))))",
+    "name_fields": [
+      "vendor_name",
+      "region"
+    ],
+    "ordered_fields": [
+      "vendor_name",
+      "region"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

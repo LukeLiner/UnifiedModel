@@ -1,0 +1,111 @@
+package sampledata
+
+import (
+	"context"
+	"testing"
+
+	"github.com/alibaba/UnifiedModel/internal/entitystore"
+	"github.com/alibaba/UnifiedModel/internal/graphstore"
+	"github.com/alibaba/UnifiedModel/internal/query"
+	"github.com/alibaba/UnifiedModel/internal/umodel"
+	apperrors "github.com/alibaba/UnifiedModel/pkg/errors"
+	"github.com/alibaba/UnifiedModel/pkg/model"
+)
+
+func TestLookupSampleCanonicalizesAliases(t *testing.T) {
+	for _, input := range []string{
+		MultiDomainQuickStartSample,
+		"quickstart-multidomain",
+		"quickstart",
+		"  QUICKSTART  ",
+	} {
+		def, ok := lookupSample(input)
+		if !ok {
+			t.Fatalf("expected %q to resolve", input)
+		}
+		if def.Name != MultiDomainQuickStartSample {
+			t.Fatalf("expected canonical sample %q for %q, got %q", MultiDomainQuickStartSample, input, def.Name)
+		}
+	}
+}
+
+func TestImportUnknownSampleListsAvailableSamples(t *testing.T) {
+	graph := graphstore.NewMemoryStore()
+	umodelSvc := umodel.NewService(graph)
+	entitySvc := entitystore.NewService(graph, umodelSvc)
+	svc := NewService(umodelSvc, entitySvc)
+
+	_, err := svc.Import(context.Background(), "demo", "missing-sample")
+	coded, ok := apperrors.As(err)
+	if !ok || coded.Code != apperrors.CodeNotFound {
+		t.Fatalf("expected not found error, got %v", err)
+	}
+	if coded.Details["available"] != MultiDomainQuickStartSample {
+		t.Fatalf("expected available samples in error details, got %+v", coded.Details)
+	}
+}
+
+func TestImportMultiDomainQuickStartWritesSchemaEntitiesAndTopology(t *testing.T) {
+	ctx := context.Background()
+	graph := graphstore.NewMemoryStore()
+	umodelSvc := umodel.NewService(graph)
+	entitySvc := entitystore.NewService(graph, umodelSvc)
+	svc := NewService(umodelSvc, entitySvc)
+
+	result, err := svc.Import(ctx, "demo", MultiDomainQuickStartSample)
+	if err != nil {
+		t.Fatalf("import sample: %v", err)
+	}
+	if result.Sample != MultiDomainQuickStartSample || result.UModel.Imported == 0 {
+		t.Fatalf("expected multi-domain sample import, got %+v", result)
+	}
+	if result.EntityCount == 0 || result.Entities.Accepted != result.EntityCount {
+		t.Fatalf("expected all sample entities accepted, got %+v", result)
+	}
+	if result.RelationCount == 0 || result.Relations.Accepted != result.RelationCount {
+		t.Fatalf("expected all sample relations accepted, got %+v", result)
+	}
+
+	querySvc := query.NewService(graph)
+	for _, kind := range []string{"metric_set", "log_set", "trace_set", "event_set", "profile_set", "runbook_set", "data_link", "storage_link"} {
+		rows, err := querySvc.Execute(ctx, "demo", model.QueryRequest{
+			Query: ".umodel with(kind='" + kind + "') | limit 1",
+		})
+		if err != nil {
+			t.Fatalf("query excluded kind %s: %v", kind, err)
+		}
+		if len(rows.Rows) != 0 {
+			t.Fatalf("quickstart should not import %s definitions, got %+v", kind, rows)
+		}
+	}
+
+	entityRows, err := querySvc.Execute(ctx, "demo", model.QueryRequest{
+		Query: ".entity with(domain='devops', name='devops.service', query='checkout') | project __entity_id__,display_name,business_value | limit 10",
+	})
+	if err != nil {
+		t.Fatalf("query sample entity: %v", err)
+	}
+	if len(entityRows.Rows) == 0 {
+		t.Fatalf("expected cart service entity, got %+v", entityRows)
+	}
+
+	topoRows, err := querySvc.Execute(ctx, "demo", model.QueryRequest{
+		Query: ".topo | graph-call getDirectRelations([(:\"devops@devops.service\" {__entity_id__: '10000000000000000000000000000101'})]) | project src,relation,dest | limit 20",
+	})
+	if err != nil {
+		t.Fatalf("query sample topology: %v", err)
+	}
+	if len(topoRows.Rows) == 0 {
+		t.Fatalf("expected cart topology relations, got %+v", topoRows)
+	}
+
+	cypherRows, err := querySvc.Execute(ctx, "demo", model.QueryRequest{
+		Query: ".topo | graph-call cypher(`match (svc:``devops@devops.service`` {__entity_id__: '10000000000000000000000000000101'}) optional match path = (svc)-[r*1..2]-(neighbor) with svc, neighbor, relationships(path) as rels where neighbor is null or coalesce(neighbor.__deleted__, false) = false return svc.__entity_id__ as service, neighbor.__entity_id__ as neighbor, [rel in rels | type(rel)] as relation_types, size(rels) as hops order by hops, neighbor limit 10`) | limit 10",
+	})
+	if err != nil {
+		t.Fatalf("query sample cypher topology: %v", err)
+	}
+	if len(cypherRows.Rows) == 0 {
+		t.Fatalf("expected cypher to see sample topology, got %+v", cypherRows)
+	}
+}

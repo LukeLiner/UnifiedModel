@@ -1,0 +1,142 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "supplier.delivery_order",
+    "display_name": {
+      "zh_cn": "交付单",
+      "en_us": "Delivery Order"
+    },
+    "description": {
+      "zh_cn": "交付单实体",
+      "en_us": "Delivery order entity"
+    },
+    "domain": "supplier"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "delivery_id",
+        "display_name": {
+          "zh_cn": "交付单ID",
+          "en_us": "Delivery ID"
+        },
+        "description": {
+          "zh_cn": "交付单ID",
+          "en_us": "Delivery id"
+        },
+        "type": "string",
+        "example": "DEL-8101"
+      },
+      {
+        "name": "component_lot_id",
+        "display_name": {
+          "zh_cn": "成品批次ID",
+          "en_us": "Component Lot ID"
+        },
+        "description": {
+          "zh_cn": "成品批次ID",
+          "en_us": "Component lot id"
+        },
+        "type": "string",
+        "example": "CMP-9001"
+      },
+      {
+        "name": "product_family",
+        "display_name": {
+          "zh_cn": "产品族",
+          "en_us": "Product Family"
+        },
+        "description": {
+          "zh_cn": "产品族",
+          "en_us": "Product family"
+        },
+        "type": "string",
+        "example": "battery_pack"
+      },
+      {
+        "name": "customer_name",
+        "display_name": {
+          "zh_cn": "客户名称",
+          "en_us": "Customer Name"
+        },
+        "description": {
+          "zh_cn": "客户名称",
+          "en_us": "Customer name"
+        },
+        "type": "string",
+        "example": "星海汽车"
+      },
+      {
+        "name": "planned_qty",
+        "display_name": {
+          "zh_cn": "计划数量",
+          "en_us": "Planned Qty"
+        },
+        "description": {
+          "zh_cn": "计划数量",
+          "en_us": "Planned qty"
+        },
+        "type": "integer",
+        "example": 80
+      },
+      {
+        "name": "delivered_qty",
+        "display_name": {
+          "zh_cn": "已交付数量",
+          "en_us": "Delivered Qty"
+        },
+        "description": {
+          "zh_cn": "已交付数量",
+          "en_us": "Delivered qty"
+        },
+        "type": "integer",
+        "example": 40
+      },
+      {
+        "name": "otif_rate",
+        "display_name": {
+          "zh_cn": "按时足量率",
+          "en_us": "OTIF Rate"
+        },
+        "description": {
+          "zh_cn": "按时足量率",
+          "en_us": "OTIF rate"
+        },
+        "type": "float",
+        "example": 0.5
+      },
+      {
+        "name": "status",
+        "display_name": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "description": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "type": "string",
+        "example": "partial"
+      }
+    ],
+    "primary_key_fields": [
+      "delivery_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(delivery_id as varbinary))))",
+    "name_fields": [
+      "delivery_id",
+      "customer_name",
+      "product_family"
+    ],
+    "ordered_fields": [
+      "delivery_id",
+      "status"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

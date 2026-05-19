@@ -1,0 +1,142 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "supplier.purchase_order",
+    "display_name": {
+      "zh_cn": "采购单",
+      "en_us": "Purchase Order"
+    },
+    "description": {
+      "zh_cn": "采购单实体",
+      "en_us": "Purchase order entity"
+    },
+    "domain": "supplier"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "po_id",
+        "display_name": {
+          "zh_cn": "采购单ID",
+          "en_us": "PO ID"
+        },
+        "description": {
+          "zh_cn": "采购单ID",
+          "en_us": "PO id"
+        },
+        "type": "string",
+        "example": "SPO-3001"
+      },
+      {
+        "name": "vendor_id",
+        "display_name": {
+          "zh_cn": "供应商ID",
+          "en_us": "Vendor ID"
+        },
+        "description": {
+          "zh_cn": "供应商ID",
+          "en_us": "Vendor id"
+        },
+        "type": "string",
+        "example": "VND-PC"
+      },
+      {
+        "name": "vendor_name",
+        "display_name": {
+          "zh_cn": "供应商名称",
+          "en_us": "Vendor Name"
+        },
+        "description": {
+          "zh_cn": "供应商名称",
+          "en_us": "Vendor name"
+        },
+        "type": "string",
+        "example": "华南电芯"
+      },
+      {
+        "name": "material_type",
+        "display_name": {
+          "zh_cn": "物料类型",
+          "en_us": "Material Type"
+        },
+        "description": {
+          "zh_cn": "物料类型",
+          "en_us": "Material type"
+        },
+        "type": "string",
+        "example": "cell"
+      },
+      {
+        "name": "planned_qty",
+        "display_name": {
+          "zh_cn": "计划数量",
+          "en_us": "Planned Qty"
+        },
+        "description": {
+          "zh_cn": "计划数量",
+          "en_us": "Planned qty"
+        },
+        "type": "integer",
+        "example": 1000
+      },
+      {
+        "name": "received_qty",
+        "display_name": {
+          "zh_cn": "已收数量",
+          "en_us": "Received Qty"
+        },
+        "description": {
+          "zh_cn": "已收数量",
+          "en_us": "Received qty"
+        },
+        "type": "integer",
+        "example": 600
+      },
+      {
+        "name": "fill_rate",
+        "display_name": {
+          "zh_cn": "满足率",
+          "en_us": "Fill Rate"
+        },
+        "description": {
+          "zh_cn": "到货满足率",
+          "en_us": "Procurement fill rate"
+        },
+        "type": "float",
+        "example": 0.6
+      },
+      {
+        "name": "status",
+        "display_name": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "description": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "type": "string",
+        "example": "partial"
+      }
+    ],
+    "primary_key_fields": [
+      "po_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(po_id as varbinary))))",
+    "name_fields": [
+      "po_id",
+      "vendor_name",
+      "material_type"
+    ],
+    "ordered_fields": [
+      "po_id",
+      "status"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

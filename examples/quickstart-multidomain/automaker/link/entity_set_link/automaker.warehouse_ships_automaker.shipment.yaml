@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "automaker.warehouse_ships_automaker.shipment",
+    "display_name": {
+      "zh_cn": "仓库发运单",
+      "en_us": "Warehouse Ships Shipment"
+    },
+    "description": {
+      "zh_cn": "仓库发运单",
+      "en_us": "Warehouse ships shipment"
+    },
+    "domain": "automaker"
+  },
+  "spec": {
+    "src": {
+      "domain": "automaker",
+      "kind": "entity_set",
+      "name": "automaker.warehouse"
+    },
+    "dest": {
+      "domain": "automaker",
+      "kind": "entity_set",
+      "name": "automaker.shipment"
+    },
+    "entity_link_type": "related_to"
+  }
+}

@@ -1,0 +1,181 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "automaker.shipment",
+    "display_name": {
+      "zh_cn": "发运单",
+      "en_us": "Shipment"
+    },
+    "description": {
+      "zh_cn": "发运单实体",
+      "en_us": "Shipment entity"
+    },
+    "domain": "automaker"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "shipment_id",
+        "display_name": {
+          "zh_cn": "发运单ID",
+          "en_us": "Shipment ID"
+        },
+        "description": {
+          "zh_cn": "发运单编号",
+          "en_us": "Shipment id"
+        },
+        "type": "string",
+        "example": "SHIP-2001"
+      },
+      {
+        "name": "warehouse_id",
+        "display_name": {
+          "zh_cn": "仓库ID",
+          "en_us": "Warehouse ID"
+        },
+        "description": {
+          "zh_cn": "发出仓库",
+          "en_us": "Warehouse id"
+        },
+        "type": "string",
+        "example": "WH-NORTH"
+      },
+      {
+        "name": "warehouse_name",
+        "display_name": {
+          "zh_cn": "仓库名称",
+          "en_us": "Warehouse Name"
+        },
+        "description": {
+          "zh_cn": "仓库名称",
+          "en_us": "Warehouse name"
+        },
+        "type": "string",
+        "example": "北方成品库"
+      },
+      {
+        "name": "dealer_id",
+        "display_name": {
+          "zh_cn": "经销商ID",
+          "en_us": "Dealer ID"
+        },
+        "description": {
+          "zh_cn": "目标经销商",
+          "en_us": "Dealer id"
+        },
+        "type": "string",
+        "example": "DLR-SH"
+      },
+      {
+        "name": "dealer_name",
+        "display_name": {
+          "zh_cn": "经销商名称",
+          "en_us": "Dealer Name"
+        },
+        "description": {
+          "zh_cn": "经销商名称",
+          "en_us": "Dealer name"
+        },
+        "type": "string",
+        "example": "上海旗舰店"
+      },
+      {
+        "name": "vehicle_vins",
+        "display_name": {
+          "zh_cn": "车辆VIN列表",
+          "en_us": "Vehicle VINs"
+        },
+        "description": {
+          "zh_cn": "车辆VIN列表",
+          "en_us": "Vehicle vins"
+        },
+        "type": "string",
+        "example": "AUTO-VIN-0002"
+      },
+      {
+        "name": "primary_vehicle_vin",
+        "display_name": {
+          "zh_cn": "主车辆VIN",
+          "en_us": "Primary Vehicle VIN"
+        },
+        "description": {
+          "zh_cn": "主车辆VIN",
+          "en_us": "Primary vehicle vin"
+        },
+        "type": "string",
+        "example": "AUTO-VIN-0002"
+      },
+      {
+        "name": "vehicle_count",
+        "display_name": {
+          "zh_cn": "车辆数",
+          "en_us": "Vehicle Count"
+        },
+        "description": {
+          "zh_cn": "车辆数",
+          "en_us": "Vehicle count"
+        },
+        "type": "integer",
+        "example": 1
+      },
+      {
+        "name": "route_code",
+        "display_name": {
+          "zh_cn": "线路编码",
+          "en_us": "Route Code"
+        },
+        "description": {
+          "zh_cn": "物流线路编码",
+          "en_us": "Route code"
+        },
+        "type": "string",
+        "example": "WH-NORTH->DLR-SH"
+      },
+      {
+        "name": "status",
+        "display_name": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "description": {
+          "zh_cn": "发运状态",
+          "en_us": "Shipment status"
+        },
+        "type": "string",
+        "example": "in_transit"
+      },
+      {
+        "name": "eta_ticks",
+        "display_name": {
+          "zh_cn": "剩余到达Tick",
+          "en_us": "ETA Ticks"
+        },
+        "description": {
+          "zh_cn": "剩余到达tick",
+          "en_us": "ETA ticks"
+        },
+        "type": "integer",
+        "example": 2
+      }
+    ],
+    "primary_key_fields": [
+      "shipment_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(shipment_id as varbinary))))",
+    "name_fields": [
+      "shipment_id",
+      "warehouse_name",
+      "dealer_name"
+    ],
+    "ordered_fields": [
+      "shipment_id",
+      "status"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

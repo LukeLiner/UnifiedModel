@@ -1,0 +1,23 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "k8s.namespace_contains_k8s.workload"
+  domain: k8s
+  display_name:
+    en_us: "Namespace Contains Workload"
+    zh_cn: "命名空间包含工作负载"
+  description:
+    en_us: "A namespace contains workloads."
+    zh_cn: "命名空间包含工作负载。"
+spec:
+  src:
+    domain: k8s
+    kind: entity_set
+    name: k8s.namespace
+  dest:
+    domain: k8s
+    kind: entity_set
+    name: k8s.workload
+  entity_link_type: contains

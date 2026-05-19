@@ -1,0 +1,111 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "devops.deployment"
+  domain: devops
+  display_name:
+    en_us: "Deployment"
+    zh_cn: "部署"
+  description:
+    en_us: "A release deployment event that changes a service in an environment."
+    zh_cn: "在某个环境中变更服务版本的发布部署事件。"
+spec:
+  fields:
+    - name: id
+      type: string
+      display_name:
+        en_us: "ID"
+        zh_cn: "ID"
+      description:
+        en_us: "Stable entity identifier."
+        zh_cn: "稳定实体标识。"
+    - name: display_name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "名称"
+      description:
+        en_us: "Human-readable name."
+        zh_cn: "可读名称。"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Current deployment status."
+        zh_cn: "当前部署状态。"
+    - name: version
+      type: string
+      display_name:
+        en_us: "Version"
+        zh_cn: "版本"
+      description:
+        en_us: "Released artifact or image version."
+        zh_cn: "发布的制品或镜像版本。"
+    - name: service_name
+      type: string
+      display_name:
+        en_us: "Service Name"
+        zh_cn: "服务名称"
+      description:
+        en_us: "Target service name."
+        zh_cn: "目标服务名称。"
+    - name: environment
+      type: string
+      display_name:
+        en_us: "Environment"
+        zh_cn: "环境"
+      description:
+        en_us: "Target environment."
+        zh_cn: "目标环境。"
+    - name: commit_sha
+      type: string
+      display_name:
+        en_us: "Commit SHA"
+        zh_cn: "提交 SHA"
+      description:
+        en_us: "Source commit for the deployment."
+        zh_cn: "部署对应的源码提交。"
+    - name: artifact
+      type: string
+      display_name:
+        en_us: "Artifact"
+        zh_cn: "制品"
+      description:
+        en_us: "Build artifact or image."
+        zh_cn: "构建制品或镜像。"
+    - name: strategy
+      type: string
+      display_name:
+        en_us: "Strategy"
+        zh_cn: "策略"
+      description:
+        en_us: "Deployment strategy."
+        zh_cn: "部署策略。"
+    - name: risk_level
+      type: string
+      display_name:
+        en_us: "Risk Level"
+        zh_cn: "风险等级"
+      description:
+        en_us: "Operational risk level."
+        zh_cn: "运维风险等级。"
+    - name: rollback_available
+      type: boolean
+      display_name:
+        en_us: "Rollback Available"
+        zh_cn: "可回滚"
+      description:
+        en_us: "Whether a rollback path is available."
+        zh_cn: "是否有可用回滚路径。"
+  primary_key_fields:
+    - id
+  id_generator: "id"
+  name_fields:
+    - display_name
+  ordered_fields: ["id", "display_name", "status", "service_name", "environment", "version", "risk_level"]
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

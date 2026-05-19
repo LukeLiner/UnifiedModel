@@ -1,0 +1,111 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "k8s.cluster"
+  domain: k8s
+  display_name:
+    en_us: "Kubernetes Cluster"
+    zh_cn: "Kubernetes 集群"
+  description:
+    en_us: "A coarse-grained Kubernetes cluster object for quickstart topology."
+    zh_cn: "Quickstart 中的粗粒度 Kubernetes 集群对象。"
+spec:
+  fields:
+    - name: id
+      type: string
+      display_name:
+        en_us: "ID"
+        zh_cn: "ID"
+      description:
+        en_us: "Stable entity identifier."
+        zh_cn: "稳定实体标识。"
+    - name: display_name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "名称"
+      description:
+        en_us: "Human-readable name."
+        zh_cn: "可读名称。"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Current lifecycle status."
+        zh_cn: "当前生命周期状态。"
+    - name: owner
+      type: string
+      display_name:
+        en_us: "Owner"
+        zh_cn: "负责人"
+      description:
+        en_us: "Owning team or person."
+        zh_cn: "负责人或团队。"
+    - name: environment
+      type: string
+      display_name:
+        en_us: "Environment"
+        zh_cn: "环境"
+      description:
+        en_us: "Runtime environment."
+        zh_cn: "运行环境。"
+    - name: provider
+      type: string
+      display_name:
+        en_us: "Provider"
+        zh_cn: "云厂商"
+      description:
+        en_us: "Cloud or platform provider."
+        zh_cn: "云或平台提供方。"
+    - name: region
+      type: string
+      display_name:
+        en_us: "Region"
+        zh_cn: "地域"
+      description:
+        en_us: "Cluster region."
+        zh_cn: "集群所在地域。"
+    - name: version
+      type: string
+      display_name:
+        en_us: "Version"
+        zh_cn: "版本"
+      description:
+        en_us: "Kubernetes control-plane version."
+        zh_cn: "Kubernetes 控制面版本。"
+    - name: node_count
+      type: integer
+      display_name:
+        en_us: "Node Count"
+        zh_cn: "节点数"
+      description:
+        en_us: "Number of schedulable nodes."
+        zh_cn: "可调度节点数量。"
+    - name: network_mode
+      type: string
+      display_name:
+        en_us: "Network Mode"
+        zh_cn: "网络模式"
+      description:
+        en_us: "Cluster network mode."
+        zh_cn: "集群网络模式。"
+    - name: business_value
+      type: string
+      display_name:
+        en_us: "Business Value"
+        zh_cn: "业务价值"
+      description:
+        en_us: "Why this object matters."
+        zh_cn: "该对象的业务价值。"
+  primary_key_fields:
+    - id
+  id_generator: "id"
+  name_fields:
+    - display_name
+  ordered_fields: ["id", "display_name", "status", "owner", "environment", "provider", "region", "version"]
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

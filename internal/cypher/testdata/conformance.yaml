@@ -1,0 +1,48 @@
+- name: complex optional variable path
+  query: |
+    MATCH (svc:`apm@apm.service` {__entity_id__: $svc})
+    OPTIONAL MATCH path = (svc)-[:calls*1..2]-(neighbor)
+    WITH svc, neighbor, relationships(path) AS rels
+    WHERE neighbor IS NULL OR coalesce(neighbor.__deleted__, false) = false
+    RETURN svc.__entity_id__ AS service,
+           neighbor.__entity_id__ AS neighbor,
+           [rel IN rels | type(rel)] AS relation_types,
+           size(rels) AS hops
+    ORDER BY hops, neighbor
+    LIMIT 20
+  params:
+    svc: 54013ba69c196820e56801f1ef5aad54
+  columns: [service, neighbor, relation_types, hops]
+  rows:
+    - service: 54013ba69c196820e56801f1ef5aad54
+      neighbor: 177627f91af678a9b03e993f1a91917f
+      relation_types: [calls]
+      hops: 1
+    - service: 54013ba69c196820e56801f1ef5aad54
+      neighbor: 2b5c1f4e7a6d8b9c0e1f23456789abcd
+      relation_types: [calls, calls]
+      hops: 2
+- name: unwind distinct
+  query: |
+    WITH [1, 2, 2] AS values
+    UNWIND values AS v
+    RETURN DISTINCT v
+    ORDER BY v DESC
+  columns: [v]
+  rows:
+    - v: 2
+    - v: 1
+- name: aggregate relation types
+  query: |
+    MATCH (svc:`apm@apm.service`)-[r:calls]->(neighbor)
+    WITH svc.__entity_id__ AS service, type(r) AS relation
+    RETURN service, count(relation) AS relation_count, collect(relation) AS relation_types
+    ORDER BY service
+  columns: [service, relation_count, relation_types]
+  rows:
+    - service: 177627f91af678a9b03e993f1a91917f
+      relation_count: 1
+      relation_types: [calls]
+    - service: 54013ba69c196820e56801f1ef5aad54
+      relation_count: 1
+      relation_types: [calls]

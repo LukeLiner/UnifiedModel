@@ -1,0 +1,135 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "devops.service"
+  domain: devops
+  display_name:
+    en_us: "Service"
+    zh_cn: "服务"
+  description:
+    en_us: "A deployable software service owned by a DevOps team."
+    zh_cn: "由 DevOps 团队负责的可部署软件服务。"
+spec:
+  fields:
+    - name: id
+      type: string
+      display_name:
+        en_us: "ID"
+        zh_cn: "ID"
+      description:
+        en_us: "Stable entity identifier."
+        zh_cn: "稳定实体标识。"
+    - name: display_name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "名称"
+      description:
+        en_us: "Human-readable name."
+        zh_cn: "可读名称。"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Current lifecycle status."
+        zh_cn: "当前生命周期状态。"
+    - name: owner
+      type: string
+      display_name:
+        en_us: "Owner"
+        zh_cn: "负责人"
+      description:
+        en_us: "Owning team or person."
+        zh_cn: "负责人或团队。"
+    - name: environment
+      type: string
+      display_name:
+        en_us: "Environment"
+        zh_cn: "环境"
+      description:
+        en_us: "Runtime environment."
+        zh_cn: "运行环境。"
+    - name: language
+      type: string
+      display_name:
+        en_us: "Language"
+        zh_cn: "语言"
+      description:
+        en_us: "Primary implementation language."
+        zh_cn: "主要实现语言。"
+    - name: runtime_platform
+      type: string
+      display_name:
+        en_us: "Runtime Platform"
+        zh_cn: "运行平台"
+      description:
+        en_us: "Primary runtime platform."
+        zh_cn: "主要运行平台。"
+    - name: repo_path
+      type: string
+      display_name:
+        en_us: "Repository Path"
+        zh_cn: "仓库路径"
+      description:
+        en_us: "Source repository path."
+        zh_cn: "源码仓库路径。"
+    - name: exposure
+      type: string
+      display_name:
+        en_us: "Exposure"
+        zh_cn: "暴露范围"
+      description:
+        en_us: "Whether the service is internal, partner-facing, or public."
+        zh_cn: "服务面向内部、合作方还是公网。"
+    - name: sla_tier
+      type: string
+      display_name:
+        en_us: "SLA Tier"
+        zh_cn: "SLA 层级"
+      description:
+        en_us: "Reliability commitment tier."
+        zh_cn: "可靠性承诺层级。"
+    - name: data_sensitivity
+      type: string
+      display_name:
+        en_us: "Data Sensitivity"
+        zh_cn: "数据敏感级别"
+      description:
+        en_us: "Data sensitivity handled by the service."
+        zh_cn: "服务处理的数据敏感级别。"
+    - name: contact_channel
+      type: string
+      display_name:
+        en_us: "Contact Channel"
+        zh_cn: "联系渠道"
+      description:
+        en_us: "Primary support or ownership channel."
+        zh_cn: "主要支持或归属渠道。"
+    - name: tier
+      type: string
+      display_name:
+        en_us: "Tier"
+        zh_cn: "层级"
+      description:
+        en_us: "Operational or business tier."
+        zh_cn: "运维或业务层级。"
+    - name: business_value
+      type: string
+      display_name:
+        en_us: "Business Value"
+        zh_cn: "业务价值"
+      description:
+        en_us: "Why this object matters."
+        zh_cn: "该对象的业务价值。"
+  primary_key_fields:
+    - id
+  id_generator: "id"
+  name_fields:
+    - display_name
+  ordered_fields: ["id", "display_name", "status", "owner", "environment", "runtime_platform", "sla_tier"]
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

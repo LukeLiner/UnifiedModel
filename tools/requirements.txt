@@ -1,0 +1,11 @@
+# UModel 开发依赖
+# 运行 schema 展开、代码生成、验证器所需
+
+PyYAML>=6.0
+
+# 可选：测试
+# pytest>=7.0
+
+# 可选：Python 代码质量检查
+# mypy>=1.0
+# flake8>=6.0

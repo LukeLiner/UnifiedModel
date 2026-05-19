@@ -1,0 +1,1947 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Schema to Table HTML Documentation Generator
+将 umodel schema 文件转换为表格形式的 HTML 文档
+专注于单文件转换，高密度信息展示，支持与expanded schema对比
+"""
+
+import yaml
+import argparse
+import os
+from typing import Dict, Any, List, Optional, Union, Set
+import json
+import hashlib
+
+
+class SchemaToTableHtmlConverter:
+    def __init__(self):
+        self.tables = []  # 存储所有表格
+        self.current_table_id = 0
+        self.expanded_schema = None  # 存储对应的expanded schema
+        
+    def generate_table_id(self, name: str) -> str:
+        """生成唯一的表格ID"""
+        self.current_table_id += 1
+        # 移除特殊字符，确保ID有效
+        safe_name = name.replace(' ', '_').replace('-', '_')
+        return f"table_{self.current_table_id}_{safe_name}"
+    
+    def load_expanded_schema(self, kind: str) -> Dict[str, Any]:
+        """加载对应的expanded schema"""
+        # 构建expanded schema文件路径
+        expanded_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'expanded_schemas')
+        expanded_file = os.path.join(expanded_dir, f"{kind}.expanded.yaml")
+        
+        if os.path.exists(expanded_file):
+            with open(expanded_file, 'r', encoding='utf-8') as f:
+                return yaml.safe_load(f)
+        return None
+    
+    def convert_file(self, yaml_file: str, output_file: str = None) -> str:
+        """转换单个YAML文件为HTML"""
+        with open(yaml_file, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+        
+        self.tables = []
+        self.current_table_id = 0
+        
+        # 加载对应的expanded schema
+        if data and 'kind' in data:
+            self.expanded_schema = self.load_expanded_schema(data['kind'])
+        
+        # 生成表格内容
+        self._generate_tables(data, os.path.basename(yaml_file))
+        
+        # 生成HTML
+        html_content = self._generate_html(data)
+        
+        # 写入文件
+        if output_file:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            print(f"✅ HTML文档已生成: {output_file}")
+        
+        return html_content
+    
+    def _get_expanded_field_info(self, path: List[str]) -> Dict[str, Any]:
+        """从expanded schema中获取字段信息"""
+        if not self.expanded_schema:
+            return None
+        
+        current = self.expanded_schema
+        
+        # 导航到正确的版本
+        if 'versions' in current and current['versions']:
+            current = current['versions'][0]  # 使用第一个版本
+        
+        # 按路径导航
+        for key in path:
+            if isinstance(current, dict):
+                if 'spec' in current and key in current['spec'].get('properties', {}):
+                    current = current['spec']['properties'][key]
+                elif 'properties' in current and key in current['properties']:
+                    current = current['properties'][key]
+                elif key in current:
+                    current = current[key]
+                else:
+                    return None
+            else:
+                return None
+        
+        return current
+    
+    def _generate_tables(self, data: Dict[str, Any], file_name: str):
+        """生成表格数据"""
+        if not data or not isinstance(data, dict):
+            return
+        
+        # 获取基本信息
+        kind = data.get('kind', 'unknown')
+        metadata = data.get('metadata', {})
+        name = metadata.get('name', file_name)
+        
+        # 创建主表格 - 基本信息
+        basic_info = self._extract_basic_info(data)
+        if basic_info:
+            main_table = {
+                'id': self.generate_table_id('basic_info'),
+                'title': f"{name} - 基本信息",
+                'type': 'info',
+                'data': basic_info
+            }
+            self.tables.append(main_table)
+        
+        # 处理metadata部分的额外字段
+        metadata_fields = self._extract_metadata_fields(metadata)
+        if metadata_fields:
+            metadata_table = {
+                'id': self.generate_table_id('metadata'),
+                'title': f"{name} - 元数据字段",
+                'type': 'fields_table',
+                'data': metadata_fields
+            }
+            self.tables.append(metadata_table)
+        
+        # 处理spec部分
+        if 'spec' in data or (self.expanded_schema and 'versions' in self.expanded_schema):
+            spec = data.get('spec', {})
+            
+            # 合并提取spec的所有字段（包括未配置的）
+            all_spec_fields = self._extract_all_spec_fields(spec)
+            if all_spec_fields:
+                spec_table = {
+                    'id': self.generate_table_id('spec_fields'),
+                    'title': f"{name} - 规格字段",
+                    'type': 'fields_table',
+                    'data': all_spec_fields
+                }
+                self.tables.append(spec_table)
+            
+            # 处理labels
+            if 'labels' in spec or self._has_expanded_field(['spec', 'labels']):
+                self._process_labels(spec.get('labels', {}), name)
+            
+            # 处理metrics
+            if 'metrics' in spec or self._has_expanded_field(['spec', 'metrics']):
+                self._process_metrics(spec.get('metrics', []), name)
+            
+            # 处理fields (entity_set)
+            if 'fields' in spec or self._has_expanded_field(['spec', 'fields']):
+                self._process_entity_fields(spec.get('fields', []), name)
+            
+            # 处理filters
+            if 'filters' in spec or self._has_expanded_field(['spec', 'filters']):
+                self._process_filters(spec.get('filters', []), name)
+            
+            # 处理properties (通用属性)
+            if 'properties' in spec or self._has_expanded_field(['spec', 'properties']):
+                self._process_properties(spec.get('properties', {}), name, '')
+    
+    def _has_expanded_field(self, path: List[str]) -> bool:
+        """检查expanded schema中是否有该字段"""
+        field_info = self._get_expanded_field_info(path)
+        return field_info is not None
+    
+    def _extract_all_spec_fields(self, spec: Dict) -> List[Dict]:
+        """提取spec中的所有字段，包括未配置的"""
+        fields = []
+        
+        # 获取expanded schema中的spec定义
+        expanded_spec = None
+        if self.expanded_schema and 'versions' in self.expanded_schema:
+            expanded_spec = self.expanded_schema['versions'][0].get('spec', {}).get('properties', {})
+        
+        # 已处理的复杂字段
+        complex_fields = ['labels', 'metrics', 'fields', 'filters', 'properties']
+        
+        # 收集所有字段（配置的和未配置的）
+        all_fields = set()
+        
+        # 从实际配置中收集
+        if spec:
+            all_fields.update(spec.keys())
+        
+        # 从expanded schema中收集
+        if expanded_spec:
+            for key in expanded_spec.keys():
+                if key not in complex_fields:
+                    all_fields.add(key)
+        
+        # 处理每个字段
+        for field_name in sorted(all_fields):
+            if field_name in complex_fields:
+                continue
+            
+            value = spec.get(field_name) if spec else None
+            expanded_info = expanded_spec.get(field_name, {}) if expanded_spec else {}
+            
+            # 判断是否为简单类型
+            is_simple = True
+            if expanded_info:
+                field_type = expanded_info.get('type', 'unknown')
+                if field_type in ['object', 'map'] and 'properties' in expanded_info:
+                    is_simple = False
+                elif field_type == 'array' and not self._is_simple_array(value):
+                    # 检查数组项是否复杂
+                    array_constraint = expanded_info.get('constraint', {}).get('array', {})
+                    if 'item' in array_constraint:
+                        item_type = array_constraint['item'].get('type', 'string')
+                        if item_type == 'object':
+                            is_simple = False
+            
+            if not is_simple:
+                continue
+            
+            field_info = {
+                'field': field_name,
+                'value': self._format_value(value) if value is not None else '<未配置>',
+                'type': self._get_value_type(value) if value is not None else self._get_expanded_type(expanded_info),
+                'configured': value is not None
+            }
+            
+            # 添加默认值信息
+            if value is None and expanded_info:
+                default_value = self._get_default_value(expanded_info)
+                if default_value is not None:
+                    field_info['default'] = self._format_value(default_value)
+            
+            fields.append(field_info)
+        
+        return fields
+    
+    def _get_expanded_type(self, field_info: Dict) -> str:
+        """从expanded schema中获取类型信息"""
+        if not field_info:
+            return 'unknown'
+        
+        field_type = field_info.get('type', 'unknown')
+        
+        # 处理数组类型
+        if field_type == 'array':
+            constraint = field_info.get('constraint', {})
+            if 'array' in constraint and 'item' in constraint['array']:
+                item_type = constraint['array']['item'].get('type', 'unknown')
+                return f'array[{item_type}]'
+        
+        return field_type
+    
+    def _get_default_value(self, field_info: Dict) -> Any:
+        """获取字段的默认值"""
+        if not field_info:
+            return None
+        
+        # 直接的默认值
+        if 'default_value' in field_info:
+            return field_info['default_value']
+        
+        # 从constraint中获取默认值
+        constraint = field_info.get('constraint', {})
+        if isinstance(constraint, dict):
+            if 'default_value' in constraint:
+                return constraint['default_value']
+            # 枚举的默认值
+            if 'enum' in constraint and isinstance(constraint['enum'], dict):
+                if 'default_value' in constraint['enum']:
+                    return constraint['enum']['default_value']
+        
+        return None
+    
+    def _process_labels(self, labels_data: Dict, name: str):
+        """处理标签部分"""
+        # Labels的基本信息
+        if labels_data:
+            label_info = []
+            for key, value in labels_data.items():
+                if key != 'keys' and not isinstance(value, (dict, list)):
+                    label_info.append({
+                        'field': key,
+                        'value': value,
+                        'type': type(value).__name__,
+                        'configured': True
+                    })
+            
+            if label_info:
+                label_info_table = {
+                    'id': self.generate_table_id('label_info'),
+                    'title': f"{name} - 标签配置",
+                    'type': 'fields_table',
+                    'data': label_info
+                }
+                self.tables.append(label_info_table)
+        
+        # Labels的keys - 需要显示所有expanded中定义的字段
+        expanded_label_fields = self._get_expanded_label_fields()
+        keys = labels_data.get('keys', []) if labels_data else []
+        keys_with_expanded = self._merge_with_expanded_fields(keys, expanded_label_fields)
+        
+        labels_table = {
+            'id': self.generate_table_id('labels'),
+            'title': f"{name} - 标签字段定义",
+            'type': 'labels',
+            'data': keys_with_expanded
+        }
+        self.tables.append(labels_table)
+    
+    def _get_expanded_label_fields(self) -> Dict[str, Any]:
+        """获取expanded schema中定义的label字段"""
+        expanded_info = self._get_expanded_field_info(['spec', 'labels', 'keys'])
+        if expanded_info and 'constraint' in expanded_info:
+            array_info = expanded_info['constraint'].get('array', {})
+            if 'item' in array_info and 'properties' in array_info['item']:
+                return array_info['item']['properties']
+        return {}
+    
+    def _process_metrics(self, metrics: List[Dict], name: str):
+        """处理指标部分"""
+        # 获取expanded中定义的metric字段
+        expanded_metric_fields = self._get_expanded_metric_fields()
+        metrics_with_expanded = self._merge_metrics_with_expanded(metrics, expanded_metric_fields)
+        
+        metrics_table = {
+            'id': self.generate_table_id('metrics'),
+            'title': f"{name} - 指标定义",
+            'type': 'metrics',
+            'data': metrics_with_expanded
+        }
+        self.tables.append(metrics_table)
+    
+    def _get_expanded_metric_fields(self) -> Dict[str, Any]:
+        """获取expanded schema中定义的metric字段"""
+        expanded_info = self._get_expanded_field_info(['spec', 'metrics'])
+        if expanded_info and 'constraint' in expanded_info:
+            array_info = expanded_info['constraint'].get('array', {})
+            if 'item' in array_info and 'properties' in array_info['item']:
+                return array_info['item']['properties']
+        return {}
+    
+    def _merge_metrics_with_expanded(self, configured_metrics: List[Dict], expanded_fields: Dict) -> List[Dict]:
+        """合并配置的指标和expanded schema中的字段定义"""
+        result = []
+        
+        # 对于每个配置的metric，确保包含所有expanded字段
+        for metric in configured_metrics:
+            merged_metric = {}
+            
+            # 首先添加所有expanded字段的默认值
+            for field_name, field_info in expanded_fields.items():
+                default_value = self._get_default_value(field_info)
+                if field_name in ['display_name', 'description', 'short_description']:
+                    # 多语言字段特殊处理
+                    merged_metric[field_name] = {'zh_cn': '', 'en_us': ''}
+                elif default_value is not None:
+                    merged_metric[field_name] = default_value
+                else:
+                    # 根据类型设置默认值
+                    field_type = field_info.get('type', 'string')
+                    if field_type == 'boolean':
+                        merged_metric[field_name] = False
+                    elif field_type in ['integer', 'number']:
+                        merged_metric[field_name] = 0
+                    elif field_type == 'array':
+                        merged_metric[field_name] = []
+                    else:
+                        merged_metric[field_name] = ''
+            
+            # 然后用实际配置覆盖
+            merged_metric.update(metric)
+            merged_metric['_configured'] = True
+            result.append(merged_metric)
+        
+        return result
+    
+    def _process_entity_fields(self, fields: List[Dict], name: str):
+        """处理实体字段部分"""
+        # 获取expanded中定义的field字段
+        expanded_field_fields = self._get_expanded_entity_field_fields()
+        fields_with_expanded = self._merge_entity_fields_with_expanded(fields, expanded_field_fields)
+        
+        fields_table = {
+            'id': self.generate_table_id('fields'),
+            'title': f"{name} - 字段定义",
+            'type': 'entity_fields',
+            'data': fields_with_expanded
+        }
+        self.tables.append(fields_table)
+    
+    def _get_expanded_entity_field_fields(self) -> Dict[str, Any]:
+        """获取expanded schema中定义的entity field字段"""
+        expanded_info = self._get_expanded_field_info(['spec', 'fields'])
+        if expanded_info and 'constraint' in expanded_info:
+            array_info = expanded_info['constraint'].get('array', {})
+            if 'item' in array_info and 'properties' in array_info['item']:
+                return array_info['item']['properties']
+        return {}
+    
+    def _merge_entity_fields_with_expanded(self, configured_fields: List[Dict], expanded_fields: Dict) -> List[Dict]:
+        """合并配置的字段和expanded schema中的字段定义"""
+        result = []
+        
+        # 对于每个配置的field，确保包含所有expanded字段
+        for field in configured_fields:
+            merged_field = {}
+            
+            # 首先添加所有expanded字段的默认值
+            for field_name, field_info in expanded_fields.items():
+                default_value = self._get_default_value(field_info)
+                if field_name in ['display_name', 'description', 'short_description']:
+                    # 多语言字段特殊处理
+                    merged_field[field_name] = {'zh_cn': '', 'en_us': ''}
+                elif default_value is not None:
+                    merged_field[field_name] = default_value
+                else:
+                    # 根据类型设置默认值
+                    field_type = field_info.get('type', 'string')
+                    if field_type == 'boolean':
+                        merged_field[field_name] = False
+                    elif field_type in ['integer', 'number']:
+                        merged_field[field_name] = 0
+                    elif field_type == 'array':
+                        merged_field[field_name] = []
+                    else:
+                        merged_field[field_name] = ''
+            
+            # 然后用实际配置覆盖
+            merged_field.update(field)
+            merged_field['_configured'] = True
+            result.append(merged_field)
+        
+        return result
+    
+    def _merge_with_expanded_fields(self, configured_items: List[Dict], expanded_fields: Dict) -> List[Dict]:
+        """通用的合并函数，合并配置项和expanded schema中的字段定义"""
+        result = []
+        
+        # 对于每个配置的item，确保包含所有expanded字段
+        for item in configured_items:
+            merged_item = {}
+            
+            # 首先添加所有expanded字段的默认值
+            for field_name, field_info in expanded_fields.items():
+                default_value = self._get_default_value(field_info)
+                if field_name in ['display_name', 'description', 'short_description']:
+                    # 多语言字段特殊处理
+                    merged_item[field_name] = {'zh_cn': '', 'en_us': ''}
+                elif default_value is not None:
+                    merged_item[field_name] = default_value
+                else:
+                    # 根据类型设置默认值
+                    field_type = field_info.get('type', 'string')
+                    if field_type == 'boolean':
+                        merged_item[field_name] = False
+                    elif field_type in ['integer', 'number']:
+                        merged_item[field_name] = 0
+                    elif field_type == 'array':
+                        merged_item[field_name] = []
+                    else:
+                        merged_item[field_name] = ''
+            
+            # 然后用实际配置覆盖
+            merged_item.update(item)
+            merged_item['_configured'] = True
+            result.append(merged_item)
+        
+        return result
+    
+    def _process_filters(self, filters: List[Dict], name: str):
+        """处理过滤器部分"""
+        if filters or self._has_expanded_field(['spec', 'filters']):
+            filters_table = {
+                'id': self.generate_table_id('filters'),
+                'title': f"{name} - 过滤器定义",
+                'type': 'filters',
+                'data': filters if filters else []
+            }
+            self.tables.append(filters_table)
+    
+    def _extract_basic_info(self, data: Dict) -> List[Dict]:
+        """提取基本信息"""
+        info = []
+        
+        # Kind
+        if 'kind' in data:
+            info.append({
+                'field': '类型 (Kind)',
+                'value': data['kind'],
+                'type': 'string',
+                'configured': True
+            })
+        
+        # Schema信息
+        if 'schema' in data:
+            schema = data['schema']
+            for key, value in schema.items():
+                field_name = {
+                    'version': '版本 (Version)',
+                    'url': 'Schema URL'
+                }.get(key, key)
+                info.append({
+                    'field': field_name,
+                    'value': value,
+                    'type': 'string',
+                    'configured': True
+                })
+        
+        # Metadata基本信息
+        if 'metadata' in data:
+            metadata = data['metadata']
+            if 'name' in metadata:
+                info.append({
+                    'field': '名称 (Name)',
+                    'value': metadata['name'],
+                    'type': 'string',
+                    'configured': True
+                })
+            if 'domain' in metadata:
+                info.append({
+                    'field': '域 (Domain)',
+                    'value': metadata['domain'],
+                    'type': 'string',
+                    'configured': True
+                })
+        
+        return info
+    
+    def _extract_metadata_fields(self, metadata: Dict) -> List[Dict]:
+        """提取metadata中的所有字段"""
+        fields = []
+        
+        # 获取expanded schema中的metadata定义
+        expanded_metadata = None
+        if self.expanded_schema and 'versions' in self.expanded_schema:
+            expanded_metadata = self.expanded_schema['versions'][0].get('spec', {}).get('properties', {}).get('metadata', {}).get('properties', {})
+        
+        # 处理多语言字段
+        multilang_fields = ['display_name', 'description', 'short_description']
+        for field_name in multilang_fields:
+            if field_name in metadata:
+                value = metadata[field_name]
+                if isinstance(value, dict):
+                    # 中文
+                    if 'zh_cn' in value:
+                        fields.append({
+                            'field': f"{field_name} (中文)",
+                            'value': value['zh_cn'],
+                            'type': 'string',
+                            'configured': True
+                        })
+                    # 英文
+                    if 'en_us' in value:
+                        fields.append({
+                            'field': f"{field_name} (English)",
+                            'value': value['en_us'],
+                            'type': 'string',
+                            'configured': True
+                        })
+                else:
+                    fields.append({
+                        'field': field_name,
+                        'value': str(value),
+                        'type': 'string',
+                        'configured': True
+                    })
+            elif expanded_metadata and field_name in expanded_metadata:
+                # 未配置的多语言字段
+                fields.append({
+                    'field': f"{field_name} (中文)",
+                    'value': '<未配置>',
+                    'type': 'string',
+                    'configured': False
+                })
+                fields.append({
+                    'field': f"{field_name} (English)",
+                    'value': '<未配置>',
+                    'type': 'string',
+                    'configured': False
+                })
+        
+        # 处理其他字段
+        all_fields = set()
+        if metadata:
+            all_fields.update(metadata.keys())
+        if expanded_metadata:
+            all_fields.update(expanded_metadata.keys())
+        
+        for key in sorted(all_fields):
+            if key not in ['name', 'domain'] + multilang_fields:
+                value = metadata.get(key)
+                expanded_info = expanded_metadata.get(key, {}) if expanded_metadata else {}
+                
+                if value is not None:
+                    if not isinstance(value, (dict, list)) or self._is_simple_array(value):
+                        fields.append({
+                            'field': key,
+                            'value': self._format_value(value),
+                            'type': self._get_value_type(value),
+                            'configured': True
+                        })
+                else:
+                    # 未配置的字段
+                    field_type = self._get_expanded_type(expanded_info)
+                    field_info = {
+                        'field': key,
+                        'value': '<未配置>',
+                        'type': field_type,
+                        'configured': False
+                    }
+                    
+                    # 添加默认值
+                    default_value = self._get_default_value(expanded_info)
+                    if default_value is not None:
+                        field_info['default'] = self._format_value(default_value)
+                    
+                    fields.append(field_info)
+        
+        return fields
+    
+    def _is_simple_array(self, value: Any) -> bool:
+        """判断是否是简单数组（字符串数组等）"""
+        if not isinstance(value, list):
+            return False
+        if not value:  # 空数组
+            return True
+        # 检查是否所有元素都是简单类型
+        return all(isinstance(item, (str, int, float, bool)) for item in value)
+    
+    def _format_value(self, value: Any) -> str:
+        """格式化值的显示"""
+        if isinstance(value, list):
+            if self._is_simple_array(value):
+                return ', '.join(str(item) for item in value)
+            else:
+                return json.dumps(value, ensure_ascii=False, indent=2)
+        elif isinstance(value, dict):
+            return json.dumps(value, ensure_ascii=False, indent=2)
+        elif isinstance(value, bool):
+            return '是' if value else '否'
+        else:
+            return str(value)
+    
+    def _get_value_type(self, value: Any) -> str:
+        """获取值的类型描述"""
+        if isinstance(value, bool):
+            return 'boolean'
+        elif isinstance(value, int):
+            return 'integer'
+        elif isinstance(value, float):
+            return 'float'
+        elif isinstance(value, str):
+            return 'string'
+        elif isinstance(value, list):
+            if not value:
+                return 'array'
+            elif self._is_simple_array(value):
+                item_type = type(value[0]).__name__
+                return f'array[{item_type}]'
+            else:
+                return 'array[object]'
+        elif isinstance(value, dict):
+            return 'object'
+        else:
+            return 'unknown'
+    
+    def _process_properties(self, properties: Dict[str, Any], parent_name: str, prefix: str):
+        """处理properties部分，支持嵌套"""
+        # 获取expanded的properties定义
+        expanded_properties = None
+        if self.expanded_schema and 'versions' in self.expanded_schema:
+            path = ['spec', 'properties', 'properties']
+            if prefix:
+                path.extend(prefix.split('_'))
+            expanded_info = self._get_expanded_field_info(path)
+            if expanded_info and 'properties' in expanded_info:
+                expanded_properties = expanded_info['properties']
+        
+        # 收集所有属性（配置的和未配置的）
+        all_props = set()
+        if properties:
+            all_props.update(properties.keys())
+        if expanded_properties:
+            all_props.update(expanded_properties.keys())
+        
+        if not all_props:
+            return
+        
+        props_data = []
+        nested_properties = []
+        
+        for prop_name in sorted(all_props):
+            prop_data = properties.get(prop_name) if properties else None
+            expanded_prop = expanded_properties.get(prop_name, {}) if expanded_properties else {}
+            
+            if prop_data is not None:
+                # 已配置的属性
+                prop_info = {
+                    'name': prop_name,
+                    'type': prop_data.get('type', 'unknown'),
+                    'description_zh': '',
+                    'description_en': '',
+                    'required': prop_data.get('required', False),
+                    'default': prop_data.get('default_value', '-'),
+                    'constraints': [],
+                    'configured': True
+                }
+                
+                # 处理描述
+                if 'description' in prop_data:
+                    desc = prop_data['description']
+                    if isinstance(desc, dict):
+                        prop_info['description_zh'] = desc.get('zh_cn', '')
+                        prop_info['description_en'] = desc.get('en_us', '')
+                    else:
+                        prop_info['description_zh'] = str(desc)
+                
+                # 收集其他约束信息
+                constraint_fields = ['pattern', 'min_len', 'max_len', 'min_value', 'max_value', 
+                                   'enum', 'example', 'format']
+                for field in constraint_fields:
+                    if field in prop_data:
+                        prop_info['constraints'].append(f"{field}: {prop_data[field]}")
+                
+                # 如果有嵌套属性，记录下来
+                if 'properties' in prop_data:
+                    nested_properties.append((prop_name, prop_data['properties']))
+            else:
+                # 未配置的属性
+                prop_info = {
+                    'name': prop_name,
+                    'type': self._get_expanded_type(expanded_prop),
+                    'description_zh': '<未配置>',
+                    'description_en': '<未配置>',
+                    'required': False,
+                    'default': '-',
+                    'constraints': [],
+                    'configured': False
+                }
+                
+                # 从expanded schema获取描述
+                if 'description' in expanded_prop:
+                    desc = expanded_prop['description']
+                    if isinstance(desc, dict):
+                        prop_info['description_zh'] = desc.get('zh_cn', '')
+                        prop_info['description_en'] = desc.get('en_us', '')
+                
+                # 获取默认值
+                default_value = self._get_default_value(expanded_prop)
+                if default_value is not None:
+                    prop_info['default'] = self._format_value(default_value)
+                
+                # 获取required信息
+                constraint = expanded_prop.get('constraint', {})
+                if isinstance(constraint, dict) and constraint.get('required', False):
+                    prop_info['required'] = True
+            
+            props_data.append(prop_info)
+        
+        if props_data:
+            # 创建属性表
+            table_name = f"{parent_name}_properties" if not prefix else f"{parent_name}_{prefix}_properties"
+            props_table = {
+                'id': self.generate_table_id(table_name),
+                'title': f"{parent_name} - {'嵌套' if prefix else ''}属性定义",
+                'type': 'properties',
+                'data': props_data
+            }
+            self.tables.append(props_table)
+        
+        # 递归处理嵌套属性
+        for nested_name, nested_props in nested_properties:
+            nested_prefix = f"{prefix}_{nested_name}" if prefix else nested_name
+            self._process_properties(nested_props, parent_name, nested_prefix)
+    
+    def _generate_html(self, data: Dict) -> str:
+        """生成单文件的HTML"""
+        title = data.get('metadata', {}).get('name', 'Schema Documentation')
+        return self._create_html_document(title)
+    
+    def _create_html_document(self, title: str) -> str:
+        """创建HTML文档"""
+        # 生成CSS
+        css_content = self._generate_css()
+        
+        # 生成JavaScript
+        js_content = self._generate_javascript()
+        
+        # 生成表格HTML
+        tables_html = self._generate_tables_html()
+        
+        # 组装HTML - 简化版，没有侧边栏
+        html_template = '''<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Schema Documentation</title>
+    <style>
+        {css_content}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>{title}</h1>
+            <div class="header-actions">
+                <button class="btn-primary" onclick="expandAllTables()">展开所有表格</button>
+                <button class="btn-secondary" onclick="collapseAllTables()">折叠所有表格</button>
+            </div>
+        </header>
+        
+        <main class="main-content">
+            <div class="tables-container">
+                {tables_html}
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        {js_content}
+    </script>
+</body>
+</html>'''
+        
+        return html_template.format(
+            title=title,
+            css_content=css_content,
+            js_content=js_content,
+            tables_html=tables_html
+        )
+    
+    def _generate_css(self) -> str:
+        """生成CSS样式"""
+        return '''
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 头部样式 */
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #1890ff;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-primary, .btn-secondary {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #1890ff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #d9d9d9;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        /* 主内容区域 */
+        .main-content {
+            width: 100%;
+        }
+        
+        /* 表格容器 */
+        .tables-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .table-wrapper {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .table-header {
+            padding: 16px 20px;
+            background: #fafafa;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .table-header:hover {
+            background: #f0f0f0;
+        }
+        
+        .table-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .table-toggle {
+            font-size: 14px;
+            color: #666;
+            user-select: none;
+        }
+        
+        .table-content {
+            padding: 20px;
+            overflow-x: auto;
+        }
+        
+        .table-content.collapsed {
+            display: none;
+        }
+        
+        /* 数据表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        .data-table th {
+            text-align: left;
+            padding: 10px;
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            font-weight: 500;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        
+        .data-table td {
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+        
+        .data-table tr:hover {
+            background: #f5f5f5;
+        }
+        
+        /* 字段表格样式 */
+        .fields-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .fields-table th {
+            text-align: left;
+            padding: 10px;
+            background: #f0f9ff;
+            border: 1px solid #b3d9ff;
+            font-weight: 500;
+        }
+        
+        .fields-table td {
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .fields-table .field-name {
+            font-weight: 500;
+            color: #1890ff;
+        }
+        
+        .fields-table .field-type {
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        /* 未配置字段的样式 */
+        .unconfigured {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .unconfigured-value {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .unconfigured-field {
+            background-color: #fafafa !important;
+            color: #999;
+        }
+        
+        .unconfigured-field td {
+            color: #999;
+        }
+        
+        .default-value {
+            color: #52c41a;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        
+        tr.unconfigured-row {
+            background-color: #fafafa;
+        }
+        
+        tr.unconfigured-row:hover {
+            background-color: #f0f0f0;
+        }
+        
+        tr.unconfigured-row td {
+            color: #999;
+        }
+        
+        tr.unconfigured-row .field-name {
+            color: #999;
+        }
+        
+        /* 多行文本样式 */
+        .multiline-text {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        /* 标签样式 */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-right: 4px;
+        }
+        
+        .tag-type {
+            background: #e6f7ff;
+            color: #1890ff;
+            border: 1px solid #91d5ff;
+        }
+        
+        .tag-boolean {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+        
+        .tag-required {
+            background: #fff1f0;
+            color: #ff4d4f;
+            border: 1px solid #ffccc7;
+        }
+        
+        /* 代码样式 */
+        .code {
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .code-block {
+            display: block;
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        /* 约束信息样式 */
+        .constraints-list {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .constraints-list li {
+            margin-left: 20px;
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .data-table {
+                font-size: 12px;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 6px;
+            }
+            
+            .table-content {
+                padding: 10px;
+            }
+        }
+        '''
+    
+    def _generate_javascript(self) -> str:
+        """生成JavaScript代码"""
+        return '''
+        // 切换表格展开/折叠
+        function toggleTable(element) {
+            const wrapper = element.closest('.table-wrapper');
+            const content = wrapper.querySelector('.table-content');
+            const toggle = wrapper.querySelector('.table-toggle');
+            
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                toggle.textContent = '▼';
+            } else {
+                content.classList.add('collapsed');
+                toggle.textContent = '▶';
+            }
+        }
+        
+        // 展开所有表格
+        function expandAllTables() {
+            document.querySelectorAll('.table-content').forEach(content => {
+                content.classList.remove('collapsed');
+            });
+            document.querySelectorAll('.table-toggle').forEach(toggle => {
+                toggle.textContent = '▼';
+            });
+        }
+        
+        // 折叠所有表格
+        function collapseAllTables() {
+            document.querySelectorAll('.table-content').forEach(content => {
+                content.classList.add('collapsed');
+            });
+            document.querySelectorAll('.table-toggle').forEach(toggle => {
+                toggle.textContent = '▶';
+            });
+        }
+        
+        // DOM加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 表格头点击事件 - 使用事件委托
+            document.addEventListener('click', function(e) {
+                const header = e.target.closest('.table-header');
+                if (header) {
+                    toggleTable(header);
+                }
+            });
+        });
+        '''
+    
+    def _generate_tables_html(self) -> str:
+        """生成所有表格的HTML"""
+        html_parts = []
+        
+        for table in self.tables:
+            table_html = self._generate_single_table_html(table)
+            html_parts.append(table_html)
+        
+        return '\n'.join(html_parts)
+    
+    def _generate_single_table_html(self, table: Dict) -> str:
+        """生成单个表格的HTML"""
+        table_id = table['id']
+        title = table['title']
+        table_type = table['type']
+        data = table['data']
+        
+        # 表格容器
+        html = f'''
+        <div class="table-wrapper" id="{table_id}">
+            <div class="table-header">
+                <h3 class="table-title">{title}</h3>
+                <span class="table-toggle">▼</span>
+            </div>
+            <div class="table-content">
+        '''
+        
+        # 根据类型生成不同的表格内容
+        if table_type == 'info':
+            html += self._generate_info_table(data)
+        elif table_type == 'fields_table':
+            html += self._generate_fields_table(data)
+        elif table_type == 'labels':
+            html += self._generate_labels_table(data)
+        elif table_type == 'metrics':
+            html += self._generate_metrics_table(data)
+        elif table_type == 'entity_fields':
+            html += self._generate_entity_fields_table(data)
+        elif table_type == 'filters':
+            html += self._generate_filters_table(data)
+        elif table_type == 'properties':
+            html += self._generate_properties_table(data)
+        
+        html += '''
+            </div>
+        </div>
+        '''
+        
+        return html
+    
+    def _generate_info_table(self, data: List[Dict]) -> str:
+        """生成基本信息表格"""
+        html = '''
+        <table class="fields-table">
+            <thead>
+                <tr>
+                    <th width="30%">字段</th>
+                    <th width="50%">值</th>
+                    <th width="20%">类型</th>
+                </tr>
+            </thead>
+            <tbody>
+        '''
+        
+        for item in data:
+            row_class = '' if item.get('configured', True) else ' class="unconfigured-row"'
+            html += f'''
+            <tr{row_class}>
+                <td class="field-name">{item['field']}</td>
+                <td>{item['value']}</td>
+                <td><span class="field-type">{item['type']}</span></td>
+            </tr>
+            '''
+        
+        html += '''
+            </tbody>
+        </table>
+        '''
+        return html
+    
+    def _generate_fields_table(self, data: List[Dict]) -> str:
+        """生成字段表格（通用）"""
+        html = '''
+        <table class="fields-table">
+            <thead>
+                <tr>
+                    <th width="25%">字段名</th>
+                    <th width="45%">值</th>
+                    <th width="15%">类型</th>
+                    <th width="15%">默认值</th>
+                </tr>
+            </thead>
+            <tbody>
+        '''
+        
+        for item in data:
+            configured = item.get('configured', True)
+            row_class = '' if configured else ' class="unconfigured-row"'
+            
+            value_display = item['value']
+            # 如果值很长，使用代码块显示
+            if len(value_display) > 100 or '\n' in value_display:
+                value_display = f'<pre class="code-block">{value_display}</pre>'
+            elif not configured:
+                value_display = f'<span class="unconfigured-value">{value_display}</span>'
+            
+            # 默认值
+            default_value = item.get('default', '')
+            if default_value and default_value != '-':
+                default_display = f'<span class="default-value">{default_value}</span>'
+            else:
+                default_display = '-'
+            
+            html += f'''
+            <tr{row_class}>
+                <td class="field-name">{item['field']}</td>
+                <td class="multiline-text">{value_display}</td>
+                <td><span class="field-type">{item['type']}</span></td>
+                <td>{default_display}</td>
+            </tr>
+            '''
+        
+        html += '''
+            </tbody>
+        </table>
+        '''
+        return html
+    
+    def _generate_labels_table(self, data: List[Dict]) -> str:
+        """生成标签表格，显示所有expanded中定义的字段"""
+        if not data:
+            # 获取expanded schema中的字段定义，显示空表格结构
+            expanded_fields = self._get_expanded_label_fields()
+            if expanded_fields:
+                return self._generate_empty_labels_table(expanded_fields)
+            return '<p class="unconfigured-value">未配置标签字段</p>'
+            
+        html = '''
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>显示名称（中文）</th>
+                    <th>显示名称（English）</th>
+                    <th>描述（中文）</th>
+                    <th>描述（English）</th>
+                    <th>类型</th>
+                    <th>特性</th>
+                    <th>正则</th>
+                    <th>示例</th>
+                    <th>单位</th>
+                    <th>数据格式</th>
+                    <th>最大长度</th>
+                    <th>默认值</th>
+                </tr>
+            </thead>
+            <tbody>
+        '''
+        
+        for key in data:
+            configured = key.get('_configured', True)
+            row_class = ' class="unconfigured-field"' if not configured else ''
+            
+            features = []
+            if key.get('analysable'):
+                features.append('<span class="tag tag-boolean">可分析</span>')
+            if key.get('filterable'):
+                features.append('<span class="tag tag-boolean">可过滤</span>')
+            if key.get('orderable'):
+                features.append(f'<span class="tag tag-boolean">可排序({key.get("default_order", "asc")})</span>')
+            
+            # 提取多语言内容
+            display_name_zh = ''
+            display_name_en = ''
+            if 'display_name' in key:
+                if isinstance(key['display_name'], dict):
+                    display_name_zh = key['display_name'].get('zh_cn', '')
+                    display_name_en = key['display_name'].get('en_us', '')
+                else:
+                    display_name_zh = str(key['display_name'])
+            
+            desc_zh = ''
+            desc_en = ''
+            if 'description' in key:
+                if isinstance(key['description'], dict):
+                    desc_zh = key['description'].get('zh_cn', '')
+                    desc_en = key['description'].get('en_us', '')
+                else:
+                    desc_zh = str(key['description'])
+            
+            # 处理未配置的字段
+            if not display_name_zh and not configured:
+                display_name_zh = '<span class="unconfigured-value">未配置</span>'
+            if not display_name_en and not configured:
+                display_name_en = '<span class="unconfigured-value">未配置</span>'
+            if not desc_zh and not configured:
+                desc_zh = '<span class="unconfigured-value">未配置</span>'
+            if not desc_en and not configured:
+                desc_en = '<span class="unconfigured-value">未配置</span>'
+            
+            html += f'''
+            <tr{row_class}>
+                <td><strong>{key.get('name', '')}</strong></td>
+                <td>{display_name_zh}</td>
+                <td>{display_name_en}</td>
+                <td>{desc_zh}</td>
+                <td>{desc_en}</td>
+                <td><span class="tag tag-type">{key.get('type', 'string')}</span></td>
+                <td>{' '.join(features) if features else '-'}</td>
+                <td><code class="code">{key.get('pattern', '')}</code></td>
+                <td><code class="code">{key.get('example', '')}</code></td>
+                <td>{key.get('unit', '')}</td>
+                <td>{key.get('data_format', '')}</td>
+                <td>{key.get('max_length', '')}</td>
+                <td>{key.get('default_value', '')}</td>
+            </tr>
+            '''
+        
+        html += '''
+            </tbody>
+        </table>
+        '''
+        
+        return html
+    
+    def _generate_empty_labels_table(self, expanded_fields: Dict) -> str:
+        """生成空的标签表格，显示expanded schema的结构"""
+        html = '''
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>字段名</th>
+                    <th>类型</th>
+                    <th>描述</th>
+                    <th>必填</th>
+                    <th>默认值</th>
+                </tr>
+            </thead>
+            <tbody>
+        '''
+        
+        for field_name, field_info in expanded_fields.items():
+            desc = ''
+            if 'description' in field_info:
+                desc_info = field_info['description']
+                if isinstance(desc_info, dict):
+                    desc = desc_info.get('zh_cn', desc_info.get('en_us', ''))
+                else:
+                    desc = str(desc_info)
+            
+            required = '否'
+            constraint = field_info.get('constraint', {})
+            if isinstance(constraint, dict) and constraint.get('required', False):
+                required = '是'
+            
+            default_value = self._get_default_value(field_info)
+            default_display = self._format_value(default_value) if default_value is not None else '-'
+            
+            html += f'''
+            <tr class="unconfigured-field">
+                <td><strong>{field_name}</strong></td>
+                <td><span class="tag tag-type">{field_info.get('type', 'unknown')}</span></td>
+                <td>{desc}</td>
+                <td>{required}</td>
+                <td>{default_display}</td>
+            </tr>
+            '''
+        
+        html += '''
+            </tbody>
+        </table>
+        <p class="unconfigured-value" style="margin-top: 10px;">⚠️ 标签字段未配置，以上为expanded schema中定义的字段结构</p>
+        '''
+        
+        return html
+    
+    def _generate_metrics_table(self, data: List[Dict]) -> str:
+        """生成指标表格，显示所有expanded中定义的字段"""
+        if not data:
+            # 获取expanded schema中的字段定义，显示空表格结构
+            expanded_fields = self._get_expanded_metric_fields()
+            if expanded_fields:
+                return self._generate_empty_metrics_table(expanded_fields)
+            return '<p class="unconfigured-value">未配置指标</p>'
+            
+        html = '''
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>显示名称（中文）</th>
+                    <th>显示名称（English）</th>
+                    <th>描述（中文）</th>
+                    <th>描述（English）</th>
+                    <th>黄金指标</th>
+                    <th>单位</th>
+                    <th>数据格式</th>
+                    <th>聚合器</th>
+                    <th>间隔(μs)</th>
+                    <th>默认值</th>
+                    <th>阶段</th>
+                </tr>
+            </thead>
+            <tbody>
+        '''
+        
+        for metric in data:
+            configured = metric.get('_configured', True)
+            row_class = ' class="unconfigured-field"' if not configured else ''
+            
+            golden = '✅' if metric.get('golden_metric') else '❌'
+            
+            # 提取多语言内容
+            display_name_zh = ''
+            display_name_en = ''
+            if 'display_name' in metric:
+                if isinstance(metric['display_name'], dict):
+                    display_name_zh = metric['display_name'].get('zh_cn', '')
+                    display_name_en = metric['display_name'].get('en_us', '')
+                else:
+                    display_name_zh = str(metric['display_name'])
+            
+            desc_zh = ''
+            desc_en = ''
+            if 'description' in metric:
+                if isinstance(metric['description'], dict):
+                    desc_zh = metric['description'].get('zh_cn', '')
+                    desc_en = metric['description'].get('en_us', '')
+                else:
+                    desc_zh = str(metric['description'])
+            
+            # 处理未配置的字段
+            if not display_name_zh and not configured:
+                display_name_zh = '<span class="unconfigured-value">未配置</span>'
+            if not display_name_en and not configured:
+                display_name_en = '<span class="unconfigured-value">未配置</span>'
+            if not desc_zh and not configured:
+                desc_zh = '<span class="unconfigured-value">未配置</span>'
+            if not desc_en and not configured:
+                desc_en = '<span class="unconfigured-value">未配置</span>'
+            
+            # 格式化interval_us
+            interval_display = ''
+            interval_value = metric.get('interval_us', 0)
+            if isinstance(interval_value, list):
+                interval_display = ', '.join(f'{v:,}' for v in interval_value)
+            else:
+                interval_display = f'{interval_value:,}' if interval_value else '0'
+            
+            html += f'''
+            <tr{row_class}>
+                <td><strong>{metric.get('name', '')}</strong></td>
+                <td>{display_name_zh}</td>
+                <td>{display_name_en}</td>
+                <td>{desc_zh}</td>
+                <td>{desc_en}</td>
+                <td style="text-align: center;">{golden}</td>
+                <td><code class="code">{metric.get('unit', '')}</code></td>
+                <td><code class="code">{metric.get('data_format', 'KMB')}</code></td>
+                <td><code class="code">{metric.get('aggregator', '')}</code></td>
+                <td>{interval_display}</td>
+                <td>{metric.get('default_value', 0)}</td>
+                <td><span class="tag tag-type">{metric.get('launch_stage', 'preview')}</span></td>
+            </tr>
+            '''
+            
+            # 生成器单独一行
+            if 'generator' in metric and metric['generator']:
+                html += f'''
+                <tr>
+                    <td colspan="12" style="background: #fafafa;">
+                        <strong>生成器:</strong> <code class="code-block">{metric['generator']}</code>
+                    </td>
+                </tr>
+                '''
+        
+        html += '''
+            </tbody>
+        </table>
+        '''
+        
+        return html
+    
+    def _generate_empty_metrics_table(self, expanded_fields: Dict) -> str:
+        """生成空的指标表格，显示expanded schema的结构"""
+        html = '''
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>字段名</th>
+                    <th>类型</th>
+                    <th>描述</th>
+                    <th>必填</th>
+                    <th>默认值</th>
+                </tr>
+            </thead>
+            <tbody>
+        '''
+        
+        for field_name, field_info in expanded_fields.items():
+            desc = ''
+            if 'description' in field_info:
+                desc_info = field_info['description']
+                if isinstance(desc_info, dict):
+                    desc = desc_info.get('zh_cn', desc_info.get('en_us', ''))
+                else:
+                    desc = str(desc_info)
+            
+            required = '否'
+            constraint = field_info.get('constraint', {})
+            if isinstance(constraint, dict) and constraint.get('required', False):
+                required = '是'
+            
+            default_value = self._get_default_value(field_info)
+            default_display = self._format_value(default_value) if default_value is not None else '-'
+            
+            html += f'''
+            <tr class="unconfigured-field">
+                <td><strong>{field_name}</strong></td>
+                <td><span class="tag tag-type">{field_info.get('type', 'unknown')}</span></td>
+                <td>{desc}</td>
+                <td>{required}</td>
+                <td>{default_display}</td>
+            </tr>
+            '''
+        
+        html += '''
+            </tbody>
+        </table>
+        <p class="unconfigured-value" style="margin-top: 10px;">⚠️ 指标未配置，以上为expanded schema中定义的字段结构</p>
+        '''
+        
+        return html
+    
+    def _generate_entity_fields_table(self, data: List[Dict]) -> str:
+        """生成实体字段表格，显示所有expanded中定义的字段"""
+        if not data:
+            # 获取expanded schema中的字段定义，显示空表格结构
+            expanded_fields = self._get_expanded_entity_field_fields()
+            if expanded_fields:
+                return self._generate_empty_entity_fields_table(expanded_fields)
+            return '<p class="unconfigured-value">未配置字段</p>'
+            
+        html = '''
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>显示名称（中文）</th>
+                    <th>显示名称（English）</th>
+                    <th>描述（中文）</th>
+                    <th>描述（English）</th>
+                    <th>类型</th>
+                    <th>必填</th>
+                    <th>主键</th>
+                    <th>可分析</th>
+                    <th>可过滤</th>
+                    <th>可排序</th>
+                    <th>示例</th>
+                </tr>
+            </thead>
+            <tbody>
+        '''
+        
+        for field in data:
+            configured = field.get('_configured', True)
+            row_class = ' class="unconfigured-field"' if not configured else ''
+            
+            required = '✅' if field.get('required') else '❌'
+            primary = '✅' if field.get('primary_key') else '❌'
+            analysable = '✅' if field.get('analysable') else '❌'
+            filterable = '✅' if field.get('filterable') else '❌'
+            orderable = '✅' if field.get('orderable') else '❌'
+            
+            # 提取多语言内容
+            display_name_zh = ''
+            display_name_en = ''
+            if 'display_name' in field:
+                if isinstance(field['display_name'], dict):
+                    display_name_zh = field['display_name'].get('zh_cn', '')
+                    display_name_en = field['display_name'].get('en_us', '')
+                else:
+                    display_name_zh = str(field['display_name'])
+            
+            desc_zh = ''
+            desc_en = ''
+            if 'description' in field:
+                if isinstance(field['description'], dict):
+                    desc_zh = field['description'].get('zh_cn', '')
+                    desc_en = field['description'].get('en_us', '')
+                else:
+                    desc_zh = str(field['description'])
+            
+            # 处理未配置的字段
+            if not display_name_zh and not configured:
+                display_name_zh = '<span class="unconfigured-value">未配置</span>'
+            if not display_name_en and not configured:
+                display_name_en = '<span class="unconfigured-value">未配置</span>'
+            if not desc_zh and not configured:
+                desc_zh = '<span class="unconfigured-value">未配置</span>'
+            if not desc_en and not configured:
+                desc_en = '<span class="unconfigured-value">未配置</span>'
+            
+            html += f'''
+            <tr{row_class}>
+                <td><strong>{field.get('name', '')}</strong></td>
+                <td>{display_name_zh}</td>
+                <td>{display_name_en}</td>
+                <td>{desc_zh}</td>
+                <td>{desc_en}</td>
+                <td><span class="tag tag-type">{field.get('type', 'string')}</span></td>
+                <td style="text-align: center;">{required}</td>
+                <td style="text-align: center;">{primary}</td>
+                <td style="text-align: center;">{analysable}</td>
+                <td style="text-align: center;">{filterable}</td>
+                <td style="text-align: center;">{orderable}</td>
+                <td><code class="code">{field.get('example', '')}</code></td>
+            </tr>
+            '''
+        
+        html += '''
+            </tbody>
+        </table>
+        '''
+        
+        return html
+    
+    def _generate_empty_entity_fields_table(self, expanded_fields: Dict) -> str:
+        """生成空的实体字段表格，显示expanded schema的结构"""
+        html = '''
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>字段名</th>
+                    <th>类型</th>
+                    <th>描述</th>
+                    <th>必填</th>
+                    <th>默认值</th>
+                </tr>
+            </thead>
+            <tbody>
+        '''
+        
+        for field_name, field_info in expanded_fields.items():
+            desc = ''
+            if 'description' in field_info:
+                desc_info = field_info['description']
+                if isinstance(desc_info, dict):
+                    desc = desc_info.get('zh_cn', desc_info.get('en_us', ''))
+                else:
+                    desc = str(desc_info)
+            
+            required = '否'
+            constraint = field_info.get('constraint', {})
+            if isinstance(constraint, dict) and constraint.get('required', False):
+                required = '是'
+            
+            default_value = self._get_default_value(field_info)
+            default_display = self._format_value(default_value) if default_value is not None else '-'
+            
+            html += f'''
+            <tr class="unconfigured-field">
+                <td><strong>{field_name}</strong></td>
+                <td><span class="tag tag-type">{field_info.get('type', 'unknown')}</span></td>
+                <td>{desc}</td>
+                <td>{required}</td>
+                <td>{default_display}</td>
+            </tr>
+            '''
+        
+        html += '''
+            </tbody>
+        </table>
+        <p class="unconfigured-value" style="margin-top: 10px;">⚠️ 字段未配置，以上为expanded schema中定义的字段结构</p>
+        '''
+        
+        return html
+    
+    def _generate_filters_table(self, data: List[Dict]) -> str:
+        """生成过滤器表格"""
+        if not data:
+            return '<p class="unconfigured-value">未配置过滤器</p>'
+            
+        html = '''
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>显示名称（中文）</th>
+                    <th>显示名称（English）</th>
+                    <th>描述（中文）</th>
+                    <th>描述（English）</th>
+                    <th>类型</th>
+                    <th>操作符</th>
+                    <th>示例</th>
+                </tr>
+            </thead>
+            <tbody>
+        '''
+        
+        for filter_item in data:
+            # 提取多语言内容
+            display_name_zh = ''
+            display_name_en = ''
+            if 'display_name' in filter_item:
+                if isinstance(filter_item['display_name'], dict):
+                    display_name_zh = filter_item['display_name'].get('zh_cn', '')
+                    display_name_en = filter_item['display_name'].get('en_us', '')
+                else:
+                    display_name_zh = str(filter_item['display_name'])
+            
+            desc_zh = ''
+            desc_en = ''
+            if 'description' in filter_item:
+                if isinstance(filter_item['description'], dict):
+                    desc_zh = filter_item['description'].get('zh_cn', '')
+                    desc_en = filter_item['description'].get('en_us', '')
+                else:
+                    desc_zh = str(filter_item['description'])
+            
+            operators = ', '.join(filter_item.get('operators', []))
+            
+            html += f'''
+            <tr>
+                <td><strong>{filter_item.get('name', '')}</strong></td>
+                <td>{display_name_zh}</td>
+                <td>{display_name_en}</td>
+                <td>{desc_zh}</td>
+                <td>{desc_en}</td>
+                <td><span class="tag tag-type">{filter_item.get('type', 'string')}</span></td>
+                <td><code class="code">{operators}</code></td>
+                <td><code class="code">{filter_item.get('example', '')}</code></td>
+            </tr>
+            '''
+        
+        html += '''
+            </tbody>
+        </table>
+        '''
+        
+        return html
+    
+    def _generate_properties_table(self, data: List[Dict]) -> str:
+        """生成属性表格"""
+        html = '''
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>属性名</th>
+                    <th>类型</th>
+                    <th>描述（中文）</th>
+                    <th>描述（English）</th>
+                    <th>必填</th>
+                    <th>默认值</th>
+                    <th>约束条件</th>
+                </tr>
+            </thead>
+            <tbody>
+        '''
+        
+        for prop in data:
+            configured = prop.get('configured', True)
+            row_class = '' if configured else ' class="unconfigured-row"'
+            
+            required = '✅' if prop['required'] else '❌'
+            
+            # 处理描述
+            desc_zh = prop['description_zh'] if configured else f'<span class="unconfigured">{prop["description_zh"]}</span>'
+            desc_en = prop['description_en'] if configured else f'<span class="unconfigured">{prop["description_en"]}</span>'
+            
+            # 处理约束条件
+            constraints_html = ''
+            if prop['constraints']:
+                constraints_html = '<ul class="constraints-list">'
+                for constraint in prop['constraints']:
+                    constraints_html += f'<li>{constraint}</li>'
+                constraints_html += '</ul>'
+            
+            html += f'''
+            <tr{row_class}>
+                <td><strong>{prop['name']}</strong></td>
+                <td><span class="tag tag-type">{prop['type']}</span></td>
+                <td>{desc_zh}</td>
+                <td>{desc_en}</td>
+                <td style="text-align: center;">{required}</td>
+                <td><code class="code">{prop['default']}</code></td>
+                <td>{constraints_html}</td>
+            </tr>
+            '''
+        
+        html += '''
+            </tbody>
+        </table>
+        '''
+        
+        return html
+
+
+def main():
+    parser = argparse.ArgumentParser(description='将 umodel schema 转换为表格形式的 HTML 文档')
+    parser.add_argument('input', help='输入的 YAML 文件路径')
+    parser.add_argument('-o', '--output', help='输出的 HTML 文件路径')
+    
+    args = parser.parse_args()
+    
+    # 检查输入文件
+    if not os.path.exists(args.input):
+        print(f"❌ 错误: 文件 {args.input} 不存在")
+        return
+    
+    if not args.input.endswith(('.yaml', '.yml')):
+        print(f"❌ 错误: 输入文件必须是 YAML 文件")
+        return
+    
+    # 如果没有指定输出文件，自动生成
+    if not args.output:
+        base_name = os.path.splitext(os.path.basename(args.input))[0]
+        args.output = f"{base_name}_table.html"
+    
+    converter = SchemaToTableHtmlConverter()
+    
+    try:
+        converter.convert_file(args.input, args.output)
+        print(f"🎉 转换完成！")
+        print(f"📄 输出文件: {args.output}")
+        print(f"💡 提示: 可以在浏览器中打开查看")
+        
+    except Exception as e:
+        print(f"❌ 转换失败: {str(e)}")
+        import traceback
+        traceback.print_exc()
+
+
+if __name__ == "__main__":
+    main() 

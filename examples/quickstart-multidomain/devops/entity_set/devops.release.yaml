@@ -1,0 +1,95 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "devops.release"
+  domain: devops
+  display_name:
+    en_us: "Release"
+    zh_cn: "发布"
+  description:
+    en_us: "A planned service release that groups one or more deployments."
+    zh_cn: "聚合一个或多个部署动作的计划发布。"
+spec:
+  fields:
+    - name: id
+      type: string
+      display_name:
+        en_us: "ID"
+        zh_cn: "ID"
+      description:
+        en_us: "Stable entity identifier."
+        zh_cn: "稳定实体标识。"
+    - name: display_name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "名称"
+      description:
+        en_us: "Human-readable name."
+        zh_cn: "可读名称。"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Current release status."
+        zh_cn: "当前发布状态。"
+    - name: version
+      type: string
+      display_name:
+        en_us: "Version"
+        zh_cn: "版本"
+      description:
+        en_us: "Release version."
+        zh_cn: "发布版本。"
+    - name: scope
+      type: string
+      display_name:
+        en_us: "Scope"
+        zh_cn: "范围"
+      description:
+        en_us: "Release scope."
+        zh_cn: "发布范围。"
+    - name: window
+      type: string
+      display_name:
+        en_us: "Window"
+        zh_cn: "窗口"
+      description:
+        en_us: "Release window."
+        zh_cn: "发布窗口。"
+    - name: owner
+      type: string
+      display_name:
+        en_us: "Owner"
+        zh_cn: "负责人"
+      description:
+        en_us: "Release owner."
+        zh_cn: "发布负责人。"
+    - name: release_train
+      type: string
+      display_name:
+        en_us: "Release Train"
+        zh_cn: "发布列车"
+      description:
+        en_us: "Release train or cadence."
+        zh_cn: "发布列车或节奏。"
+    - name: rollback_plan
+      type: string
+      display_name:
+        en_us: "Rollback Plan"
+        zh_cn: "回滚方案"
+      description:
+        en_us: "Rollback plan summary."
+        zh_cn: "回滚方案摘要。"
+  primary_key_fields:
+    - id
+  id_generator: "id"
+  name_fields:
+    - display_name
+  ordered_fields: ["id", "display_name", "status", "version", "scope", "window", "owner"]
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

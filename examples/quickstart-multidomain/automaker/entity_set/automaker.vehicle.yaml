@@ -1,0 +1,168 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "automaker.vehicle",
+    "display_name": {
+      "zh_cn": "车辆",
+      "en_us": "Vehicle"
+    },
+    "description": {
+      "zh_cn": "车辆实体",
+      "en_us": "Vehicle entity"
+    },
+    "domain": "automaker"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "vin",
+        "display_name": {
+          "zh_cn": "VIN",
+          "en_us": "VIN"
+        },
+        "description": {
+          "zh_cn": "车辆识别码",
+          "en_us": "Vehicle vin"
+        },
+        "type": "string",
+        "example": "AUTO-VIN-0003"
+      },
+      {
+        "name": "order_id",
+        "display_name": {
+          "zh_cn": "工单ID",
+          "en_us": "Order ID"
+        },
+        "description": {
+          "zh_cn": "所属工单",
+          "en_us": "Production order"
+        },
+        "type": "string",
+        "example": "PO-1002"
+      },
+      {
+        "name": "model",
+        "display_name": {
+          "zh_cn": "车型",
+          "en_us": "Model"
+        },
+        "description": {
+          "zh_cn": "车型",
+          "en_us": "Model"
+        },
+        "type": "string",
+        "example": "E9"
+      },
+      {
+        "name": "factory_id",
+        "display_name": {
+          "zh_cn": "工厂ID",
+          "en_us": "Factory ID"
+        },
+        "description": {
+          "zh_cn": "生产工厂",
+          "en_us": "Factory"
+        },
+        "type": "string",
+        "example": "FAC-EAST"
+      },
+      {
+        "name": "warehouse_id",
+        "display_name": {
+          "zh_cn": "库房ID",
+          "en_us": "Warehouse ID"
+        },
+        "description": {
+          "zh_cn": "库房",
+          "en_us": "Warehouse"
+        },
+        "type": "string",
+        "example": "WH-EAST"
+      },
+      {
+        "name": "warehouse_name",
+        "display_name": {
+          "zh_cn": "库房名称",
+          "en_us": "Warehouse Name"
+        },
+        "description": {
+          "zh_cn": "库房名称",
+          "en_us": "Warehouse name"
+        },
+        "type": "string",
+        "example": "华东成品库"
+      },
+      {
+        "name": "dealer_id",
+        "display_name": {
+          "zh_cn": "经销商ID",
+          "en_us": "Dealer ID"
+        },
+        "description": {
+          "zh_cn": "经销商",
+          "en_us": "Dealer"
+        },
+        "type": "string",
+        "example": "DLR-SH"
+      },
+      {
+        "name": "dealer_name",
+        "display_name": {
+          "zh_cn": "经销商名称",
+          "en_us": "Dealer Name"
+        },
+        "description": {
+          "zh_cn": "经销商名称",
+          "en_us": "Dealer name"
+        },
+        "type": "string",
+        "example": "上海旗舰店"
+      },
+      {
+        "name": "status",
+        "display_name": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "description": {
+          "zh_cn": "车辆状态",
+          "en_us": "Vehicle status"
+        },
+        "type": "string",
+        "example": "quality_hold"
+      },
+      {
+        "name": "quality_flag",
+        "display_name": {
+          "zh_cn": "质量标记",
+          "en_us": "Quality Flag"
+        },
+        "description": {
+          "zh_cn": "质量标记",
+          "en_us": "Quality flag"
+        },
+        "type": "string",
+        "example": "battery_pack_variance"
+      }
+    ],
+    "primary_key_fields": [
+      "vin"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(vin as varbinary))))",
+    "name_fields": [
+      "vin",
+      "model",
+      "dealer_name"
+    ],
+    "ordered_fields": [
+      "vin",
+      "status"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

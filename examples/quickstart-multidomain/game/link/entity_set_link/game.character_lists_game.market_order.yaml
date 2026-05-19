@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "game.character_lists_game.market_order",
+    "display_name": {
+      "zh_cn": "角色发起交易",
+      "en_us": "Character Lists Order"
+    },
+    "description": {
+      "zh_cn": "角色发起交易",
+      "en_us": "Character lists order"
+    },
+    "domain": "game"
+  },
+  "spec": {
+    "src": {
+      "domain": "game",
+      "kind": "entity_set",
+      "name": "game.character"
+    },
+    "dest": {
+      "domain": "game",
+      "kind": "entity_set",
+      "name": "game.market_order"
+    },
+    "entity_link_type": "related_to"
+  }
+}

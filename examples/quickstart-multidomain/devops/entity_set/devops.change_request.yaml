@@ -1,0 +1,95 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "devops.change_request"
+  domain: devops
+  display_name:
+    en_us: "Change Request"
+    zh_cn: "变更单"
+  description:
+    en_us: "A change request that reviews and approves delivery risk."
+    zh_cn: "用于评审和批准交付风险的变更单。"
+spec:
+  fields:
+    - name: id
+      type: string
+      display_name:
+        en_us: "ID"
+        zh_cn: "ID"
+      description:
+        en_us: "Stable entity identifier."
+        zh_cn: "稳定实体标识。"
+    - name: display_name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "名称"
+      description:
+        en_us: "Human-readable name."
+        zh_cn: "可读名称。"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Current approval status."
+        zh_cn: "当前审批状态。"
+    - name: change_type
+      type: string
+      display_name:
+        en_us: "Change Type"
+        zh_cn: "变更类型"
+      description:
+        en_us: "Type of change being requested."
+        zh_cn: "变更请求类型。"
+    - name: risk_level
+      type: string
+      display_name:
+        en_us: "Risk Level"
+        zh_cn: "风险等级"
+      description:
+        en_us: "Change risk level."
+        zh_cn: "变更风险等级。"
+    - name: approver
+      type: string
+      display_name:
+        en_us: "Approver"
+        zh_cn: "审批人"
+      description:
+        en_us: "Approving owner."
+        zh_cn: "审批负责人。"
+    - name: requested_by
+      type: string
+      display_name:
+        en_us: "Requested By"
+        zh_cn: "发起人"
+      description:
+        en_us: "Requester of the change."
+        zh_cn: "变更发起人。"
+    - name: planned_window
+      type: string
+      display_name:
+        en_us: "Planned Window"
+        zh_cn: "计划窗口"
+      description:
+        en_us: "Planned execution window."
+        zh_cn: "计划执行窗口。"
+    - name: affected_scope
+      type: string
+      display_name:
+        en_us: "Affected Scope"
+        zh_cn: "影响范围"
+      description:
+        en_us: "Expected affected service or user scope."
+        zh_cn: "预期影响的服务或用户范围。"
+  primary_key_fields:
+    - id
+  id_generator: "id"
+  name_fields:
+    - display_name
+  ordered_fields: ["id", "display_name", "status", "change_type", "risk_level", "approver"]
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

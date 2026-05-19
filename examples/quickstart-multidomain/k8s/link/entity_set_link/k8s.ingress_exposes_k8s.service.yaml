@@ -1,0 +1,23 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "k8s.ingress_exposes_k8s.service"
+  domain: k8s
+  display_name:
+    en_us: "Ingress Exposes Service"
+    zh_cn: "Ingress 暴露服务"
+  description:
+    en_us: "An ingress exposes a Kubernetes service."
+    zh_cn: "Ingress 对外暴露 Kubernetes Service。"
+spec:
+  src:
+    domain: k8s
+    kind: entity_set
+    name: k8s.ingress
+  dest:
+    domain: k8s
+    kind: entity_set
+    name: k8s.service
+  entity_link_type: exposes

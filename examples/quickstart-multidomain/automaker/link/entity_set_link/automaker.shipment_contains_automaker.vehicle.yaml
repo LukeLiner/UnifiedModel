@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "automaker.shipment_contains_automaker.vehicle",
+    "display_name": {
+      "zh_cn": "发运单包含车辆",
+      "en_us": "Shipment Contains Vehicle"
+    },
+    "description": {
+      "zh_cn": "发运单包含车辆",
+      "en_us": "Shipment contains vehicle"
+    },
+    "domain": "automaker"
+  },
+  "spec": {
+    "src": {
+      "domain": "automaker",
+      "kind": "entity_set",
+      "name": "automaker.shipment"
+    },
+    "dest": {
+      "domain": "automaker",
+      "kind": "entity_set",
+      "name": "automaker.vehicle"
+    },
+    "entity_link_type": "contains"
+  }
+}

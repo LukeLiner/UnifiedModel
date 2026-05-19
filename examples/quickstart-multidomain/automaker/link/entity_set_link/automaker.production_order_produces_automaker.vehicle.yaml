@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "automaker.production_order_produces_automaker.vehicle",
+    "display_name": {
+      "zh_cn": "工单生产车辆",
+      "en_us": "Order Produces Vehicle"
+    },
+    "description": {
+      "zh_cn": "工单生产车辆",
+      "en_us": "Order produces vehicle"
+    },
+    "domain": "automaker"
+  },
+  "spec": {
+    "src": {
+      "domain": "automaker",
+      "kind": "entity_set",
+      "name": "automaker.production_order"
+    },
+    "dest": {
+      "domain": "automaker",
+      "kind": "entity_set",
+      "name": "automaker.vehicle"
+    },
+    "entity_link_type": "related_to"
+  }
+}

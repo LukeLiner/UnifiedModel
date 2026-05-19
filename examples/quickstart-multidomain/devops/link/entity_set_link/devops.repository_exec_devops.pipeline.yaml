@@ -1,0 +1,23 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "devops.repository_exec_devops.pipeline"
+  domain: devops
+  display_name:
+    en_us: "Repository Executes Pipeline"
+    zh_cn: "仓库触发流水线"
+  description:
+    en_us: "A repository triggers a delivery pipeline."
+    zh_cn: "代码仓库触发交付流水线。"
+spec:
+  src:
+    domain: devops
+    kind: entity_set
+    name: devops.repository
+  dest:
+    domain: devops
+    kind: entity_set
+    name: devops.pipeline
+  entity_link_type: exec

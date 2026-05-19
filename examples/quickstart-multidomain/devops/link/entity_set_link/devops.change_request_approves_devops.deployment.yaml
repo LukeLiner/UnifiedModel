@@ -1,0 +1,23 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "devops.change_request_approves_devops.deployment"
+  domain: devops
+  display_name:
+    en_us: "Change Request Approves Deployment"
+    zh_cn: "变更单审批部署"
+  description:
+    en_us: "A change request approves a deployment."
+    zh_cn: "变更单审批一次部署。"
+spec:
+  src:
+    domain: devops
+    kind: entity_set
+    name: devops.change_request
+  dest:
+    domain: devops
+    kind: entity_set
+    name: devops.deployment
+  entity_link_type: approves

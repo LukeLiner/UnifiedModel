@@ -1,0 +1,102 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "supplier.component_lot",
+    "display_name": {
+      "zh_cn": "成品批次",
+      "en_us": "Component Lot"
+    },
+    "description": {
+      "zh_cn": "成品批次实体",
+      "en_us": "Component lot entity"
+    },
+    "domain": "supplier"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "component_lot_id",
+        "display_name": {
+          "zh_cn": "成品批次ID",
+          "en_us": "Component Lot ID"
+        },
+        "description": {
+          "zh_cn": "成品批次ID",
+          "en_us": "Component lot id"
+        },
+        "type": "string",
+        "example": "CMP-9001"
+      },
+      {
+        "name": "batch_id",
+        "display_name": {
+          "zh_cn": "生产批次ID",
+          "en_us": "Batch ID"
+        },
+        "description": {
+          "zh_cn": "生产批次ID",
+          "en_us": "Batch id"
+        },
+        "type": "string",
+        "example": "BAT-7001"
+      },
+      {
+        "name": "product_family",
+        "display_name": {
+          "zh_cn": "产品族",
+          "en_us": "Product Family"
+        },
+        "description": {
+          "zh_cn": "产品族",
+          "en_us": "Product family"
+        },
+        "type": "string",
+        "example": "battery_pack"
+      },
+      {
+        "name": "quantity",
+        "display_name": {
+          "zh_cn": "数量",
+          "en_us": "Quantity"
+        },
+        "description": {
+          "zh_cn": "数量",
+          "en_us": "Quantity"
+        },
+        "type": "integer",
+        "example": 96
+      },
+      {
+        "name": "claim_flag",
+        "display_name": {
+          "zh_cn": "索赔标记",
+          "en_us": "Claim Flag"
+        },
+        "description": {
+          "zh_cn": "索赔标记",
+          "en_us": "Claim flag"
+        },
+        "type": "string",
+        "example": ""
+      }
+    ],
+    "primary_key_fields": [
+      "component_lot_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(component_lot_id as varbinary))))",
+    "name_fields": [
+      "component_lot_id",
+      "product_family"
+    ],
+    "ordered_fields": [
+      "component_lot_id",
+      "product_family"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

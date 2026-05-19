@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "game.server_hosts_game.account",
+    "display_name": {
+      "zh_cn": "区服包含账号",
+      "en_us": "Server Hosts Account"
+    },
+    "description": {
+      "zh_cn": "区服包含账号",
+      "en_us": "Server hosts accounts"
+    },
+    "domain": "game"
+  },
+  "spec": {
+    "src": {
+      "domain": "game",
+      "kind": "entity_set",
+      "name": "game.server"
+    },
+    "dest": {
+      "domain": "game",
+      "kind": "entity_set",
+      "name": "game.account"
+    },
+    "entity_link_type": "contains"
+  }
+}

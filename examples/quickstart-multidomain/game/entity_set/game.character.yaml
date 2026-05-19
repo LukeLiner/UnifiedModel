@@ -1,0 +1,194 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "game.character",
+    "display_name": {
+      "zh_cn": "角色",
+      "en_us": "Character"
+    },
+    "description": {
+      "zh_cn": "角色实体",
+      "en_us": "Character entity"
+    },
+    "domain": "game"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "character_id",
+        "display_name": {
+          "zh_cn": "角色ID",
+          "en_us": "Character ID"
+        },
+        "description": {
+          "zh_cn": "角色ID",
+          "en_us": "Character id"
+        },
+        "type": "string",
+        "example": "CHAR-001"
+      },
+      {
+        "name": "account_id",
+        "display_name": {
+          "zh_cn": "账号ID",
+          "en_us": "Account ID"
+        },
+        "description": {
+          "zh_cn": "账号ID",
+          "en_us": "Account id"
+        },
+        "type": "string",
+        "example": "ACC-001"
+      },
+      {
+        "name": "server_id",
+        "display_name": {
+          "zh_cn": "区服ID",
+          "en_us": "Server ID"
+        },
+        "description": {
+          "zh_cn": "区服ID",
+          "en_us": "Server id"
+        },
+        "type": "string",
+        "example": "S1"
+      },
+      {
+        "name": "server_name",
+        "display_name": {
+          "zh_cn": "区服名",
+          "en_us": "Server Name"
+        },
+        "description": {
+          "zh_cn": "区服名",
+          "en_us": "Server name"
+        },
+        "type": "string",
+        "example": "霸业一区"
+      },
+      {
+        "name": "guild_id",
+        "display_name": {
+          "zh_cn": "公会ID",
+          "en_us": "Guild ID"
+        },
+        "description": {
+          "zh_cn": "公会ID",
+          "en_us": "Guild id"
+        },
+        "type": "string",
+        "example": "GUILD-01"
+      },
+      {
+        "name": "guild_name",
+        "display_name": {
+          "zh_cn": "公会名",
+          "en_us": "Guild Name"
+        },
+        "description": {
+          "zh_cn": "公会名",
+          "en_us": "Guild name"
+        },
+        "type": "string",
+        "example": "龙城"
+      },
+      {
+        "name": "character_name",
+        "display_name": {
+          "zh_cn": "角色名",
+          "en_us": "Character Name"
+        },
+        "description": {
+          "zh_cn": "角色名",
+          "en_us": "Character name"
+        },
+        "type": "string",
+        "example": "游戏小王子"
+      },
+      {
+        "name": "level",
+        "display_name": {
+          "zh_cn": "等级",
+          "en_us": "Level"
+        },
+        "description": {
+          "zh_cn": "等级",
+          "en_us": "Level"
+        },
+        "type": "integer",
+        "example": 48
+      },
+      {
+        "name": "combat_power",
+        "display_name": {
+          "zh_cn": "战力",
+          "en_us": "Combat Power"
+        },
+        "description": {
+          "zh_cn": "战力",
+          "en_us": "Combat power"
+        },
+        "type": "integer",
+        "example": 5200
+      },
+      {
+        "name": "gold_balance",
+        "display_name": {
+          "zh_cn": "金币余额",
+          "en_us": "Gold Balance"
+        },
+        "description": {
+          "zh_cn": "金币余额",
+          "en_us": "Gold balance"
+        },
+        "type": "integer",
+        "example": 180000
+      },
+      {
+        "name": "last_dungeon_name",
+        "display_name": {
+          "zh_cn": "最近副本名",
+          "en_us": "Last Dungeon Name"
+        },
+        "description": {
+          "zh_cn": "最近副本名",
+          "en_us": "Last dungeon name"
+        },
+        "type": "string",
+        "example": "魔龙深渊"
+      },
+      {
+        "name": "last_loot_count",
+        "display_name": {
+          "zh_cn": "最近掉落数",
+          "en_us": "Last Loot Count"
+        },
+        "description": {
+          "zh_cn": "最近掉落数",
+          "en_us": "Last loot count"
+        },
+        "type": "integer",
+        "example": 8
+      }
+    ],
+    "primary_key_fields": [
+      "character_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(character_id as varbinary))))",
+    "name_fields": [
+      "character_name",
+      "server_name",
+      "guild_name"
+    ],
+    "ordered_fields": [
+      "character_name",
+      "level"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

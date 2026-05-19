@@ -1,0 +1,116 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "automaker.factory",
+    "display_name": {
+      "zh_cn": "工厂",
+      "en_us": "Factory"
+    },
+    "description": {
+      "zh_cn": "工厂实体",
+      "en_us": "Factory entity"
+    },
+    "domain": "automaker"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "factory_id",
+        "display_name": {
+          "zh_cn": "工厂ID",
+          "en_us": "Factory ID"
+        },
+        "description": {
+          "zh_cn": "工厂唯一标识",
+          "en_us": "Factory unique id"
+        },
+        "type": "string",
+        "example": "FAC-EAST"
+      },
+      {
+        "name": "name",
+        "display_name": {
+          "zh_cn": "工厂名称",
+          "en_us": "Factory Name"
+        },
+        "description": {
+          "zh_cn": "工厂名称",
+          "en_us": "Factory name"
+        },
+        "type": "string",
+        "example": "华东电驱厂"
+      },
+      {
+        "name": "factory_name",
+        "display_name": {
+          "zh_cn": "工厂名称别名",
+          "en_us": "Factory Name Alias"
+        },
+        "description": {
+          "zh_cn": "工厂名称别名",
+          "en_us": "Factory display name"
+        },
+        "type": "string",
+        "example": "华东电驱厂"
+      },
+      {
+        "name": "region",
+        "display_name": {
+          "zh_cn": "区域",
+          "en_us": "Region"
+        },
+        "description": {
+          "zh_cn": "区域",
+          "en_us": "Region"
+        },
+        "type": "string",
+        "example": "华东"
+      },
+      {
+        "name": "line_count",
+        "display_name": {
+          "zh_cn": "产线数",
+          "en_us": "Line Count"
+        },
+        "description": {
+          "zh_cn": "产线数",
+          "en_us": "Line count"
+        },
+        "type": "integer",
+        "example": 2
+      },
+      {
+        "name": "status",
+        "display_name": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "description": {
+          "zh_cn": "工厂状态",
+          "en_us": "Factory status"
+        },
+        "type": "string",
+        "example": "running"
+      }
+    ],
+    "primary_key_fields": [
+      "factory_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(factory_id as varbinary))))",
+    "name_fields": [
+      "factory_name",
+      "region",
+      "status"
+    ],
+    "ordered_fields": [
+      "name",
+      "region"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

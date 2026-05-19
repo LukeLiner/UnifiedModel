@@ -1,0 +1,95 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "k8s.service"
+  domain: k8s
+  display_name:
+    en_us: "Kubernetes Service"
+    zh_cn: "Kubernetes Service"
+  description:
+    en_us: "A coarse network service that routes traffic to workloads."
+    zh_cn: "将流量路由到工作负载的粗粒度网络服务。"
+spec:
+  fields:
+    - name: id
+      type: string
+      display_name:
+        en_us: "ID"
+        zh_cn: "ID"
+      description:
+        en_us: "Stable entity identifier."
+        zh_cn: "稳定实体标识。"
+    - name: display_name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "名称"
+      description:
+        en_us: "Human-readable name."
+        zh_cn: "可读名称。"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Current lifecycle status."
+        zh_cn: "当前生命周期状态。"
+    - name: namespace
+      type: string
+      display_name:
+        en_us: "Namespace"
+        zh_cn: "命名空间"
+      description:
+        en_us: "Kubernetes namespace."
+        zh_cn: "Kubernetes 命名空间。"
+    - name: protocol
+      type: string
+      display_name:
+        en_us: "Protocol"
+        zh_cn: "协议"
+      description:
+        en_us: "Primary network protocol."
+        zh_cn: "主要网络协议。"
+    - name: service_type
+      type: string
+      display_name:
+        en_us: "Service Type"
+        zh_cn: "服务类型"
+      description:
+        en_us: "Kubernetes service type."
+        zh_cn: "Kubernetes Service 类型。"
+    - name: cluster_ip
+      type: string
+      display_name:
+        en_us: "Cluster IP"
+        zh_cn: "集群 IP"
+      description:
+        en_us: "Cluster-internal service IP."
+        zh_cn: "集群内服务 IP。"
+    - name: port
+      type: integer
+      display_name:
+        en_us: "Port"
+        zh_cn: "端口"
+      description:
+        en_us: "Primary service port."
+        zh_cn: "主要服务端口。"
+    - name: selector
+      type: string
+      display_name:
+        en_us: "Selector"
+        zh_cn: "选择器"
+      description:
+        en_us: "Workload selector."
+        zh_cn: "工作负载选择器。"
+  primary_key_fields:
+    - id
+  id_generator: "id"
+  name_fields:
+    - display_name
+  ordered_fields: ["id", "display_name", "status", "namespace", "service_type", "cluster_ip", "port"]
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

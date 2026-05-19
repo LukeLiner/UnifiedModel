@@ -1,0 +1,142 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "game.market_order",
+    "display_name": {
+      "zh_cn": "交易单",
+      "en_us": "Market Order"
+    },
+    "description": {
+      "zh_cn": "交易单实体",
+      "en_us": "Market order entity"
+    },
+    "domain": "game"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "order_id",
+        "display_name": {
+          "zh_cn": "订单ID",
+          "en_us": "Order ID"
+        },
+        "description": {
+          "zh_cn": "订单ID",
+          "en_us": "Order id"
+        },
+        "type": "string",
+        "example": "MKT-2001"
+      },
+      {
+        "name": "character_id",
+        "display_name": {
+          "zh_cn": "角色ID",
+          "en_us": "Character ID"
+        },
+        "description": {
+          "zh_cn": "角色ID",
+          "en_us": "Character id"
+        },
+        "type": "string",
+        "example": "CHAR-001"
+      },
+      {
+        "name": "character_name",
+        "display_name": {
+          "zh_cn": "角色名",
+          "en_us": "Character Name"
+        },
+        "description": {
+          "zh_cn": "角色名",
+          "en_us": "Character name"
+        },
+        "type": "string",
+        "example": "游戏小王子"
+      },
+      {
+        "name": "server_id",
+        "display_name": {
+          "zh_cn": "区服ID",
+          "en_us": "Server ID"
+        },
+        "description": {
+          "zh_cn": "区服ID",
+          "en_us": "Server id"
+        },
+        "type": "string",
+        "example": "S1"
+      },
+      {
+        "name": "server_name",
+        "display_name": {
+          "zh_cn": "区服名",
+          "en_us": "Server Name"
+        },
+        "description": {
+          "zh_cn": "区服名",
+          "en_us": "Server name"
+        },
+        "type": "string",
+        "example": "霸业一区"
+      },
+      {
+        "name": "item_name",
+        "display_name": {
+          "zh_cn": "物品名",
+          "en_us": "Item Name"
+        },
+        "description": {
+          "zh_cn": "物品名",
+          "en_us": "Item name"
+        },
+        "type": "string",
+        "example": "赤月战刃"
+      },
+      {
+        "name": "gold_amount",
+        "display_name": {
+          "zh_cn": "金币价格",
+          "en_us": "Gold Amount"
+        },
+        "description": {
+          "zh_cn": "金币价格",
+          "en_us": "Gold amount"
+        },
+        "type": "integer",
+        "example": 25000
+      },
+      {
+        "name": "status",
+        "display_name": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "description": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "type": "string",
+        "example": "listed"
+      }
+    ],
+    "primary_key_fields": [
+      "order_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(order_id as varbinary))))",
+    "name_fields": [
+      "order_id",
+      "character_name",
+      "item_name"
+    ],
+    "ordered_fields": [
+      "order_id",
+      "status"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

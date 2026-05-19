@@ -1,0 +1,111 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "devops.team"
+  domain: devops
+  display_name:
+    en_us: "Team"
+    zh_cn: "研发团队"
+  description:
+    en_us: "A delivery team that owns services and operational outcomes."
+    zh_cn: "负责服务和运维结果的研发团队。"
+spec:
+  fields:
+    - name: id
+      type: string
+      display_name:
+        en_us: "ID"
+        zh_cn: "ID"
+      description:
+        en_us: "Stable entity identifier."
+        zh_cn: "稳定实体标识。"
+    - name: display_name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "名称"
+      description:
+        en_us: "Human-readable name."
+        zh_cn: "可读名称。"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Current lifecycle status."
+        zh_cn: "当前生命周期状态。"
+    - name: owner
+      type: string
+      display_name:
+        en_us: "Owner"
+        zh_cn: "负责人"
+      description:
+        en_us: "Owning team or person."
+        zh_cn: "负责人或团队。"
+    - name: department
+      type: string
+      display_name:
+        en_us: "Department"
+        zh_cn: "部门"
+      description:
+        en_us: "Parent organization or department."
+        zh_cn: "所属组织或部门。"
+    - name: cost_center
+      type: string
+      display_name:
+        en_us: "Cost Center"
+        zh_cn: "成本中心"
+      description:
+        en_us: "Cost allocation identifier."
+        zh_cn: "成本归属标识。"
+    - name: member_count
+      type: integer
+      display_name:
+        en_us: "Member Count"
+        zh_cn: "成员数"
+      description:
+        en_us: "Approximate number of active members."
+        zh_cn: "活跃成员数量。"
+    - name: oncall_channel
+      type: string
+      display_name:
+        en_us: "On-call Channel"
+        zh_cn: "值班渠道"
+      description:
+        en_us: "Primary on-call or escalation channel."
+        zh_cn: "主要值班或升级渠道。"
+    - name: tier
+      type: string
+      display_name:
+        en_us: "Tier"
+        zh_cn: "层级"
+      description:
+        en_us: "Operational or business tier."
+        zh_cn: "运维或业务层级。"
+    - name: business_value
+      type: string
+      display_name:
+        en_us: "Business Value"
+        zh_cn: "业务价值"
+      description:
+        en_us: "Why this object matters."
+        zh_cn: "该对象的业务价值。"
+    - name: maturity_level
+      type: string
+      display_name:
+        en_us: "Maturity Level"
+        zh_cn: "成熟度"
+      description:
+        en_us: "Delivery or operations maturity level."
+        zh_cn: "交付或运维成熟度等级。"
+  primary_key_fields:
+    - id
+  id_generator: "id"
+  name_fields:
+    - display_name
+  ordered_fields: ["id", "display_name", "status", "owner", "department", "member_count", "tier"]
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

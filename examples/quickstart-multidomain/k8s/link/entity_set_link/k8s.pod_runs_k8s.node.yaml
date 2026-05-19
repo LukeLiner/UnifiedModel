@@ -1,0 +1,23 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "k8s.pod_runs_k8s.node"
+  domain: k8s
+  display_name:
+    en_us: "Pod Runs Node"
+    zh_cn: "Pod 运行在节点"
+  description:
+    en_us: "A pod runs on a node."
+    zh_cn: "Pod 运行在节点上。"
+spec:
+  src:
+    domain: k8s
+    kind: entity_set
+    name: k8s.pod
+  dest:
+    domain: k8s
+    kind: entity_set
+    name: k8s.node
+  entity_link_type: runs_on

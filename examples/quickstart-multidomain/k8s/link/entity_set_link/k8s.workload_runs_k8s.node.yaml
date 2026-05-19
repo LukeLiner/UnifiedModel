@@ -1,0 +1,23 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "k8s.workload_runs_k8s.node"
+  domain: k8s
+  display_name:
+    en_us: "Workload Runs On Node"
+    zh_cn: "工作负载运行在节点上"
+  description:
+    en_us: "A workload runs on a node."
+    zh_cn: "工作负载运行在节点上。"
+spec:
+  src:
+    domain: k8s
+    kind: entity_set
+    name: k8s.workload
+  dest:
+    domain: k8s
+    kind: entity_set
+    name: k8s.node
+  entity_link_type: runs

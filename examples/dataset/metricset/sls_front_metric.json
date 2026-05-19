@@ -1,0 +1,72 @@
+{
+  "kind": "metric_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "sls_front.metricset",
+    "domain": "sls",
+    "display_name": {
+      "zh_cn": "SLS前端指标",
+      "en_us": "SLS Front Metrics"
+    },
+    "description": {
+      "zh_cn": "SLS前端监控指标集",
+      "en_us": "SLS Frontend Monitoring Metrics Set"
+    }
+  },
+  "spec": {
+    "query_type": "prom",
+    "labels": {
+      "dynamic": true,
+      "filter": "fcgi_ram_check_permission_subuser{}",
+      "keys": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "project",
+          "type": "string"
+        },
+        {
+          "name": "region",
+          "type": "string"
+        }
+      ]
+    },
+    "metrics": [
+      {
+        "name": "fcgi_listconfig_fail",
+        "aggregator": "avg",
+        "generator": "fcgi_ListConfig_fail{}",
+        "golden_metric": true,
+        "query_mode": "range",
+        "data_format": "KMB",
+        "unit": "count",
+        "statistics": ["Avg", "Max", "Min"]
+      },
+      {
+        "name": "fcgi_listconfig_latency",
+        "aggregator": "avg",
+        "generator": "fcgi_ListConfig_latency{}",
+        "golden_metric": false,
+        "query_mode": "range",
+        "data_format": "KMB",
+        "unit": "ms",
+        "statistics": ["Avg", "P99", "P95"]
+      },
+      {
+        "name": "fcgi_listconfig_count",
+        "aggregator": "sum",
+        "generator": "fcgi_ListConfig_count{}",
+        "golden_metric": false,
+        "query_mode": "range",
+        "data_format": "KMB",
+        "unit": "count",
+        "statistics": ["Sum", "Max", "Min"]
+      }
+    ]
+  }
+}

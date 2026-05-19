@@ -1,0 +1,252 @@
+package query
+
+import (
+	"context"
+	"testing"
+
+	"github.com/alibaba/UnifiedModel/internal/graphstore"
+	apperrors "github.com/alibaba/UnifiedModel/pkg/errors"
+	"github.com/alibaba/UnifiedModel/pkg/model"
+)
+
+func TestExecuteRequiresUnifiedSPLSource(t *testing.T) {
+	svc := NewService(graphstore.NewMemoryStore())
+	_, err := svc.Execute(context.Background(), "demo", model.QueryRequest{Query: "select * from entity"})
+	if !apperrors.IsCode(err, apperrors.CodeQueryParseError) {
+		t.Fatalf("expected query parse error, got %v", err)
+	}
+}
+
+func TestExecuteUModelQuery(t *testing.T) {
+	ctx := context.Background()
+	store := graphstore.NewMemoryStore()
+	_, err := store.PutUModelElements(ctx, model.UModelElementBatch{
+		Workspace: "demo",
+		Elements: []model.UModelElement{{
+			Kind:   "entity_set",
+			Domain: "apm",
+			Name:   "service",
+			Spec: map[string]any{
+				"fields": []any{map[string]any{"name": "service_id", "display_name": map[string]any{"en_us": "Service ID"}}},
+			},
+		}},
+	})
+	if err != nil {
+		t.Fatalf("put umodel: %v", err)
+	}
+
+	svc := NewService(store)
+	result, err := svc.Execute(ctx, "demo", model.QueryRequest{Query: ".umodel with(kind='entity_set') | limit 20"})
+	if err != nil {
+		t.Fatalf("execute query: %v", err)
+	}
+	if len(result.Rows) != 1 {
+		t.Fatalf("expected one row, got %d", len(result.Rows))
+	}
+	if result.Explain == nil || result.Explain.Source != ".umodel" {
+		t.Fatalf("missing explain: %+v", result.Explain)
+	}
+
+	searchResult, err := svc.Execute(ctx, "demo", model.QueryRequest{Query: ".umodel with(query='Service ID') | limit 20"})
+	if err != nil {
+		t.Fatalf("execute spec search: %v", err)
+	}
+	if len(searchResult.Rows) != 1 {
+		t.Fatalf("expected spec query to match one row, got %+v", searchResult.Rows)
+	}
+}
+
+func TestExecuteUModelPipeline(t *testing.T) {
+	ctx := context.Background()
+	store := graphstore.NewMemoryStore()
+	_, err := store.PutUModelElements(ctx, model.UModelElementBatch{
+		Workspace: "demo",
+		Elements: []model.UModelElement{
+			{Kind: "entity_set", Domain: "apm", Name: "operation"},
+			{Kind: "entity_set", Domain: "apm", Name: "service"},
+			{Kind: "entity_set", Domain: "k8s", Name: "pod"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("put umodel: %v", err)
+	}
+
+	svc := NewService(store)
+	result, err := svc.Execute(ctx, "demo", model.QueryRequest{Query: ".umodel with(kind='entity_set') | where domain = 'apm' | project domain,name,kind | sort name desc | limit 1"})
+	if err != nil {
+		t.Fatalf("execute query: %v", err)
+	}
+	if len(result.Rows) != 1 || result.Rows[0]["name"] != "service" {
+		t.Fatalf("unexpected rows: %+v", result.Rows)
+	}
+	if len(result.Columns) != 3 || result.Columns[0] != "domain" || result.Columns[1] != "name" || result.Columns[2] != "kind" {
+		t.Fatalf("unexpected columns: %+v", result.Columns)
+	}
+	if result.Explain == nil || !containsString(result.Explain.Fallback, "application_sort") {
+		t.Fatalf("unexpected explain: %+v", result.Explain)
+	}
+}
+
+func TestExecuteEntityQueryUsesGraphStoreRows(t *testing.T) {
+	ctx := context.Background()
+	store := graphstore.NewMemoryStore()
+	_, err := store.WriteEntities(ctx, model.EntityWriteBatch{
+		Workspace: "demo",
+		Entities: []model.EntityPayload{{
+			"__domain__":              "apm",
+			"__entity_type__":         "apm.service",
+			"__entity_id__":           "54013ba69c196820e56801f1ef5aad54",
+			"__method__":              "Update",
+			"__first_observed_time__": int64(100),
+			"__last_observed_time__":  int64(200),
+			"display_name":            "cart",
+		}},
+	})
+	if err != nil {
+		t.Fatalf("write entity: %v", err)
+	}
+
+	svc := NewService(store)
+	result, err := svc.Execute(ctx, "demo", model.QueryRequest{Query: ".entity with(domain='apm', name='apm.service', query='cart') | limit 20"})
+	if err != nil {
+		t.Fatalf("execute entity query: %v", err)
+	}
+	if len(result.Rows) != 1 || result.Rows[0]["__entity_id__"] != "54013ba69c196820e56801f1ef5aad54" {
+		t.Fatalf("unexpected rows: %+v", result.Rows)
+	}
+	if result.Explain == nil || result.Explain.StorageProvider != "memory" {
+		t.Fatalf("unexpected explain: %+v", result.Explain)
+	}
+}
+
+func TestExecuteEntityTopKAndProject(t *testing.T) {
+	ctx := context.Background()
+	store := graphstore.NewMemoryStore()
+	_, err := store.WriteEntities(ctx, model.EntityWriteBatch{
+		Workspace: "demo",
+		Entities: []model.EntityPayload{
+			entityPayload("54013ba69c196820e56801f1ef5aad54", "cart service"),
+			entityPayload("177627f91af678a9b03e993f1a91917f", "checkout service"),
+			entityPayload("f83c2a85d972a89238f31296c63f0dbc", "payment service"),
+		},
+	})
+	if err != nil {
+		t.Fatalf("write entities: %v", err)
+	}
+
+	svc := NewService(store)
+	result, err := svc.Execute(ctx, "demo", model.QueryRequest{Query: ".entity with(domain='apm', name='apm.service', query='service', topk=2) | project __entity_id__"})
+	if err != nil {
+		t.Fatalf("execute entity query: %v", err)
+	}
+	if len(result.Rows) != 2 {
+		t.Fatalf("expected two rows, got %+v", result.Rows)
+	}
+	if len(result.Columns) != 1 || result.Columns[0] != "__entity_id__" {
+		t.Fatalf("unexpected columns: %+v", result.Columns)
+	}
+	if result.Page.Limit != 2 || result.Explain == nil || result.Explain.Limit != 2 {
+		t.Fatalf("unexpected limit/explain: page=%+v explain=%+v", result.Page, result.Explain)
+	}
+}
+
+func TestExecuteTopoDirectRelations(t *testing.T) {
+	ctx := context.Background()
+	store := graphstore.NewMemoryStore()
+	_, err := store.WriteRelations(ctx, model.RelationWriteBatch{
+		Workspace: "demo",
+		Relations: []model.RelationPayload{{
+			"__src_domain__":          "apm",
+			"__src_entity_type__":     "apm.service",
+			"__src_entity_id__":       "54013ba69c196820e56801f1ef5aad54",
+			"__dest_domain__":         "apm",
+			"__dest_entity_type__":    "apm.service",
+			"__dest_entity_id__":      "177627f91af678a9b03e993f1a91917f",
+			"__relation_type__":       "calls",
+			"__method__":              "Update",
+			"__first_observed_time__": int64(100),
+			"__last_observed_time__":  int64(200),
+		}},
+	})
+	if err != nil {
+		t.Fatalf("write relation: %v", err)
+	}
+
+	svc := NewService(store)
+	result, err := svc.Execute(ctx, "demo", model.QueryRequest{Query: ".topo | graph-call getDirectRelations([(:\"apm@apm.service\" {__entity_id__: '54013ba69c196820e56801f1ef5aad54'})]) | project src,relation,dest | limit 10"})
+	if err != nil {
+		t.Fatalf("execute topo query: %v", err)
+	}
+	if len(result.Rows) != 1 || result.Rows[0]["relation"] != "calls" {
+		t.Fatalf("unexpected rows: %+v", result.Rows)
+	}
+	if result.Explain == nil || result.Explain.Depth != 1 || !containsString(result.Explain.Pushdown, "graph_call:getDirectRelations") {
+		t.Fatalf("unexpected explain: %+v", result.Explain)
+	}
+}
+
+func TestExecuteTopoCypherOnMemory(t *testing.T) {
+	ctx := context.Background()
+	store := graphstore.NewMemoryStore()
+	_, err := store.WriteRelations(ctx, model.RelationWriteBatch{
+		Workspace: "demo",
+		Relations: []model.RelationPayload{{
+			"__src_domain__":          "apm",
+			"__src_entity_type__":     "apm.service",
+			"__src_entity_id__":       "54013ba69c196820e56801f1ef5aad54",
+			"__dest_domain__":         "apm",
+			"__dest_entity_type__":    "apm.service",
+			"__dest_entity_id__":      "177627f91af678a9b03e993f1a91917f",
+			"__relation_type__":       "calls",
+			"__method__":              "Update",
+			"__first_observed_time__": int64(100),
+			"__last_observed_time__":  int64(200),
+		}},
+	})
+	if err != nil {
+		t.Fatalf("write relation: %v", err)
+	}
+
+	svc := NewService(store)
+	query := ".topo | graph-call cypher(`match (svc:``apm@apm.service`` {__entity_id__: $svc}) optional match path = (svc)-[r*1..2]-(neighbor) with svc, neighbor, relationships(path) as rels where neighbor is null or coalesce(neighbor.__deleted__, false) = false return svc.__entity_id__ as service, neighbor.__entity_id__ as neighbor, [rel in rels | type(rel)] as relation_types, size(rels) as hops order by hops, neighbor limit 20`) | limit 20"
+	result, err := svc.Execute(ctx, "demo", model.QueryRequest{Query: query, Params: map[string]any{"svc": "54013ba69c196820e56801f1ef5aad54"}})
+	if err != nil {
+		t.Fatalf("execute cypher topo query: %v", err)
+	}
+	if len(result.Rows) != 1 {
+		t.Fatalf("expected one cypher row, got %+v", result.Rows)
+	}
+	row := result.Rows[0]
+	if row["service"] != "54013ba69c196820e56801f1ef5aad54" || row["neighbor"] != "177627f91af678a9b03e993f1a91917f" || row["hops"] != 1 {
+		t.Fatalf("unexpected cypher row: %+v", row)
+	}
+	if types, ok := row["relation_types"].([]string); !ok || len(types) != 1 || types[0] != "calls" {
+		t.Fatalf("unexpected relation types: %#v", row["relation_types"])
+	}
+	if result.Explain == nil || !containsString(result.Explain.Pushdown, "graph_call:cypher") || !containsString(result.Explain.Pushdown, "controlled_cypher") {
+		t.Fatalf("unexpected cypher explain: %+v", result.Explain)
+	}
+	if result.Explain.CypherDialect != "ladybug" || result.Explain.CypherEngine != "go" {
+		t.Fatalf("unexpected cypher explain metadata: %+v", result.Explain)
+	}
+}
+
+func TestExecuteTopoCypherRejectsMutationsOnMemory(t *testing.T) {
+	svc := NewService(graphstore.NewMemoryStore())
+	_, err := svc.Execute(context.Background(), "demo", model.QueryRequest{Query: ".topo | graph-call cypher(`MATCH (n) SET n.name = 'bad' RETURN n`)"})
+	if !apperrors.IsCode(err, apperrors.CodeQueryPlanError) {
+		t.Fatalf("expected read-only cypher rejection, got %v", err)
+	}
+}
+
+func entityPayload(id, displayName string) model.EntityPayload {
+	return model.EntityPayload{
+		"__domain__":              "apm",
+		"__entity_type__":         "apm.service",
+		"__entity_id__":           id,
+		"__method__":              "Update",
+		"__first_observed_time__": int64(100),
+		"__last_observed_time__":  int64(200),
+		"display_name":            displayName,
+	}
+}

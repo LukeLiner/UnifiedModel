@@ -1,0 +1,129 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "supplier.material_lot",
+    "display_name": {
+      "zh_cn": "原料批次",
+      "en_us": "Material Lot"
+    },
+    "description": {
+      "zh_cn": "原料批次实体",
+      "en_us": "Material lot entity"
+    },
+    "domain": "supplier"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "lot_id",
+        "display_name": {
+          "zh_cn": "批次ID",
+          "en_us": "Lot ID"
+        },
+        "description": {
+          "zh_cn": "批次ID",
+          "en_us": "Lot id"
+        },
+        "type": "string",
+        "example": "MAT-5001"
+      },
+      {
+        "name": "po_id",
+        "display_name": {
+          "zh_cn": "采购单ID",
+          "en_us": "PO ID"
+        },
+        "description": {
+          "zh_cn": "采购单ID",
+          "en_us": "PO id"
+        },
+        "type": "string",
+        "example": "SPO-3001"
+      },
+      {
+        "name": "vendor_id",
+        "display_name": {
+          "zh_cn": "供应商ID",
+          "en_us": "Vendor ID"
+        },
+        "description": {
+          "zh_cn": "供应商ID",
+          "en_us": "Vendor id"
+        },
+        "type": "string",
+        "example": "VND-PC"
+      },
+      {
+        "name": "vendor_name",
+        "display_name": {
+          "zh_cn": "供应商名称",
+          "en_us": "Vendor Name"
+        },
+        "description": {
+          "zh_cn": "供应商名称",
+          "en_us": "Vendor name"
+        },
+        "type": "string",
+        "example": "华南电芯"
+      },
+      {
+        "name": "material_type",
+        "display_name": {
+          "zh_cn": "物料类型",
+          "en_us": "Material Type"
+        },
+        "description": {
+          "zh_cn": "物料类型",
+          "en_us": "Material type"
+        },
+        "type": "string",
+        "example": "cell"
+      },
+      {
+        "name": "quantity",
+        "display_name": {
+          "zh_cn": "数量",
+          "en_us": "Quantity"
+        },
+        "description": {
+          "zh_cn": "数量",
+          "en_us": "Quantity"
+        },
+        "type": "integer",
+        "example": 600
+      },
+      {
+        "name": "quality_status",
+        "display_name": {
+          "zh_cn": "质量状态",
+          "en_us": "Quality Status"
+        },
+        "description": {
+          "zh_cn": "质量状态",
+          "en_us": "Quality status"
+        },
+        "type": "string",
+        "example": "accepted"
+      }
+    ],
+    "primary_key_fields": [
+      "lot_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(lot_id as varbinary))))",
+    "name_fields": [
+      "lot_id",
+      "vendor_name",
+      "material_type"
+    ],
+    "ordered_fields": [
+      "lot_id",
+      "material_type"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

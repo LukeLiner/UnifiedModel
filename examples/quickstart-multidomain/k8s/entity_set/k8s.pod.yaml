@@ -1,0 +1,103 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "k8s.pod"
+  domain: k8s
+  display_name:
+    en_us: "Kubernetes Pod"
+    zh_cn: "Kubernetes Pod"
+  description:
+    en_us: "A coarse pod instance that backs a workload."
+    zh_cn: "支撑工作负载的粗粒度 Pod 实例。"
+spec:
+  fields:
+    - name: id
+      type: string
+      display_name:
+        en_us: "ID"
+        zh_cn: "ID"
+      description:
+        en_us: "Stable entity identifier."
+        zh_cn: "稳定实体标识。"
+    - name: display_name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "名称"
+      description:
+        en_us: "Human-readable name."
+        zh_cn: "可读名称。"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Current lifecycle status."
+        zh_cn: "当前生命周期状态。"
+    - name: namespace
+      type: string
+      display_name:
+        en_us: "Namespace"
+        zh_cn: "命名空间"
+      description:
+        en_us: "Kubernetes namespace."
+        zh_cn: "Kubernetes 命名空间。"
+    - name: node
+      type: string
+      display_name:
+        en_us: "Node"
+        zh_cn: "节点"
+      description:
+        en_us: "Runtime node."
+        zh_cn: "运行节点。"
+    - name: pod_ip
+      type: string
+      display_name:
+        en_us: "Pod IP"
+        zh_cn: "Pod IP"
+      description:
+        en_us: "Pod IP address."
+        zh_cn: "Pod IP 地址。"
+    - name: image
+      type: string
+      display_name:
+        en_us: "Image"
+        zh_cn: "镜像"
+      description:
+        en_us: "Primary container image."
+        zh_cn: "主要容器镜像。"
+    - name: restart_count
+      type: integer
+      display_name:
+        en_us: "Restart Count"
+        zh_cn: "重启次数"
+      description:
+        en_us: "Container restart count."
+        zh_cn: "容器重启次数。"
+    - name: qos_class
+      type: string
+      display_name:
+        en_us: "QoS Class"
+        zh_cn: "QoS 等级"
+      description:
+        en_us: "Kubernetes QoS class."
+        zh_cn: "Kubernetes QoS 等级。"
+    - name: readiness
+      type: string
+      display_name:
+        en_us: "Readiness"
+        zh_cn: "就绪状态"
+      description:
+        en_us: "Readiness state."
+        zh_cn: "就绪状态。"
+  primary_key_fields:
+    - id
+  id_generator: "id"
+  name_fields:
+    - display_name
+  ordered_fields: ["id", "display_name", "status", "namespace", "node", "pod_ip", "restart_count"]
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

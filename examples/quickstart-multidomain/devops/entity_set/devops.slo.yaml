@@ -1,0 +1,95 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "devops.slo"
+  domain: devops
+  display_name:
+    en_us: "SLO"
+    zh_cn: "SLO"
+  description:
+    en_us: "A service-level objective used to describe reliability targets."
+    zh_cn: "用于描述可靠性目标的服务等级目标。"
+spec:
+  fields:
+    - name: id
+      type: string
+      display_name:
+        en_us: "ID"
+        zh_cn: "ID"
+      description:
+        en_us: "Stable entity identifier."
+        zh_cn: "稳定实体标识。"
+    - name: display_name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "名称"
+      description:
+        en_us: "Human-readable name."
+        zh_cn: "可读名称。"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Current objective status."
+        zh_cn: "当前目标状态。"
+    - name: objective_type
+      type: string
+      display_name:
+        en_us: "Objective Type"
+        zh_cn: "目标类型"
+      description:
+        en_us: "Reliability objective type."
+        zh_cn: "可靠性目标类型。"
+    - name: target
+      type: string
+      display_name:
+        en_us: "Target"
+        zh_cn: "目标"
+      description:
+        en_us: "Reliability target."
+        zh_cn: "可靠性目标。"
+    - name: indicator
+      type: string
+      display_name:
+        en_us: "Indicator"
+        zh_cn: "指标"
+      description:
+        en_us: "Primary service-level indicator."
+        zh_cn: "主要服务等级指标。"
+    - name: error_budget_remaining
+      type: float
+      display_name:
+        en_us: "Error Budget Remaining"
+        zh_cn: "剩余错误预算"
+      description:
+        en_us: "Remaining error budget ratio."
+        zh_cn: "剩余错误预算比例。"
+    - name: window
+      type: string
+      display_name:
+        en_us: "Window"
+        zh_cn: "窗口"
+      description:
+        en_us: "Evaluation window."
+        zh_cn: "评估窗口。"
+    - name: alert_policy
+      type: string
+      display_name:
+        en_us: "Alert Policy"
+        zh_cn: "告警策略"
+      description:
+        en_us: "Alert policy tied to this objective."
+        zh_cn: "与该目标绑定的告警策略。"
+  primary_key_fields:
+    - id
+  id_generator: "id"
+  name_fields:
+    - display_name
+  ordered_fields: ["id", "display_name", "status", "objective_type", "target", "error_budget_remaining", "window"]
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

@@ -1,0 +1,23 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "game.server_runs_k8s.workload"
+  domain: game
+  display_name:
+    en_us: "Game Server Runs Workload"
+    zh_cn: "游戏区服运行工作负载"
+  description:
+    en_us: "A game server is backed by a Kubernetes workload."
+    zh_cn: "游戏区服由 Kubernetes 工作负载承载。"
+spec:
+  src:
+    domain: game
+    kind: entity_set
+    name: game.server
+  dest:
+    domain: k8s
+    kind: entity_set
+    name: k8s.workload
+  entity_link_type: runs

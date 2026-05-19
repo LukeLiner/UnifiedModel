@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "automaker.shipment_delivers_to_automaker.dealer",
+    "display_name": {
+      "zh_cn": "发运单送达经销商",
+      "en_us": "Shipment Delivers Dealer"
+    },
+    "description": {
+      "zh_cn": "发运单送达经销商",
+      "en_us": "Shipment delivers to dealer"
+    },
+    "domain": "automaker"
+  },
+  "spec": {
+    "src": {
+      "domain": "automaker",
+      "kind": "entity_set",
+      "name": "automaker.shipment"
+    },
+    "dest": {
+      "domain": "automaker",
+      "kind": "entity_set",
+      "name": "automaker.dealer"
+    },
+    "entity_link_type": "related_to"
+  }
+}

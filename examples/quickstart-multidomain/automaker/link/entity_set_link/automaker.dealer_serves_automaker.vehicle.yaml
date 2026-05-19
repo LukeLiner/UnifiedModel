@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "automaker.dealer_serves_automaker.vehicle",
+    "display_name": {
+      "zh_cn": "经销商服务车辆",
+      "en_us": "Dealer Serves Vehicle"
+    },
+    "description": {
+      "zh_cn": "经销商服务车辆",
+      "en_us": "Dealer serves vehicle"
+    },
+    "domain": "automaker"
+  },
+  "spec": {
+    "src": {
+      "domain": "automaker",
+      "kind": "entity_set",
+      "name": "automaker.dealer"
+    },
+    "dest": {
+      "domain": "automaker",
+      "kind": "entity_set",
+      "name": "automaker.vehicle"
+    },
+    "entity_link_type": "related_to"
+  }
+}

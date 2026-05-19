@@ -1,0 +1,41 @@
+{
+  "sample": "multi-domain-quickstart",
+  "title": "Multi-domain quickstart sample",
+  "schema_pack": "examples/quickstart-multidomain",
+  "source_hint": "Enterprise demo domains reuse EntitySet and EntitySetLink topology from Demo/umodel-demo-2/umodel; dataset, storage, metric, and log definitions are intentionally excluded.",
+  "domains": [
+    "devops",
+    "k8s",
+    "automaker",
+    "game",
+    "supplier"
+  ],
+  "entities": "entities.json",
+  "relations": "relations.json",
+  "seed_entities": {
+    "checkout_service": "10000000000000000000000000000101",
+    "checkout_workload": "20000000000000000000000000000201",
+    "automaker_vehicle": "5aea6dbce9b81b0437e61eeea27cbc26",
+    "game_server": "67f6274e0ac0bd892f9b1ec09a2253fc",
+    "supplier_batch": "da48b22a817117fe8f7895a68f7ae96e"
+  },
+  "counts": {
+    "entity_sets": 35,
+    "entity_set_links": 42,
+    "data_sets": 0,
+    "data_links": 0,
+    "storage_links": 0,
+    "entities": 93,
+    "relations": 125
+  },
+  "excluded_kinds": [
+    "metric_set",
+    "log_set",
+    "trace_set",
+    "event_set",
+    "profile_set",
+    "runbook_set",
+    "data_link",
+    "storage_link"
+  ]
+}

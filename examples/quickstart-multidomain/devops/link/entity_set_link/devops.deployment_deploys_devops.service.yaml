@@ -1,0 +1,23 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "devops.deployment_deploys_devops.service"
+  domain: devops
+  display_name:
+    en_us: "Deployment Deploys Service"
+    zh_cn: "部署发布服务"
+  description:
+    en_us: "A deployment changes a service version."
+    zh_cn: "部署变更服务版本。"
+spec:
+  src:
+    domain: devops
+    kind: entity_set
+    name: devops.deployment
+  dest:
+    domain: devops
+    kind: entity_set
+    name: devops.service
+  entity_link_type: deploys

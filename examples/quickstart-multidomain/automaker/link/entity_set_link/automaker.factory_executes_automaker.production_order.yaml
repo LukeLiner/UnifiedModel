@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "automaker.factory_executes_automaker.production_order",
+    "display_name": {
+      "zh_cn": "工厂执行生产工单",
+      "en_us": "Factory Executes Order"
+    },
+    "description": {
+      "zh_cn": "工厂执行生产工单",
+      "en_us": "Factory executes orders"
+    },
+    "domain": "automaker"
+  },
+  "spec": {
+    "src": {
+      "domain": "automaker",
+      "kind": "entity_set",
+      "name": "automaker.factory"
+    },
+    "dest": {
+      "domain": "automaker",
+      "kind": "entity_set",
+      "name": "automaker.production_order"
+    },
+    "entity_link_type": "contains"
+  }
+}

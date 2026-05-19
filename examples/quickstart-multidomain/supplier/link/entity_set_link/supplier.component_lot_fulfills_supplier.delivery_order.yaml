@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "supplier.component_lot_fulfills_supplier.delivery_order",
+    "display_name": {
+      "zh_cn": "成品批次到交付单",
+      "en_us": "Component Lot Fulfills Delivery"
+    },
+    "description": {
+      "zh_cn": "成品批次关联交付单",
+      "en_us": "Component lot fulfills delivery"
+    },
+    "domain": "supplier"
+  },
+  "spec": {
+    "src": {
+      "domain": "supplier",
+      "kind": "entity_set",
+      "name": "supplier.component_lot"
+    },
+    "dest": {
+      "domain": "supplier",
+      "kind": "entity_set",
+      "name": "supplier.delivery_order"
+    },
+    "entity_link_type": "related_to"
+  }
+}

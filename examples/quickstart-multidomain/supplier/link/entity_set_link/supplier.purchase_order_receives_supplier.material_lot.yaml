@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "supplier.purchase_order_receives_supplier.material_lot",
+    "display_name": {
+      "zh_cn": "采购单到原料批次",
+      "en_us": "PO Receives Material Lot"
+    },
+    "description": {
+      "zh_cn": "采购单关联原料批次",
+      "en_us": "PO relates to material lot"
+    },
+    "domain": "supplier"
+  },
+  "spec": {
+    "src": {
+      "domain": "supplier",
+      "kind": "entity_set",
+      "name": "supplier.purchase_order"
+    },
+    "dest": {
+      "domain": "supplier",
+      "kind": "entity_set",
+      "name": "supplier.material_lot"
+    },
+    "entity_link_type": "contains"
+  }
+}

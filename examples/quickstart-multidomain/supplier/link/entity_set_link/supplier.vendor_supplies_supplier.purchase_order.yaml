@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "supplier.vendor_supplies_supplier.purchase_order",
+    "display_name": {
+      "zh_cn": "供应商到采购单",
+      "en_us": "Vendor Supplies PO"
+    },
+    "description": {
+      "zh_cn": "供应商关联采购单",
+      "en_us": "Vendor relates to PO"
+    },
+    "domain": "supplier"
+  },
+  "spec": {
+    "src": {
+      "domain": "supplier",
+      "kind": "entity_set",
+      "name": "supplier.vendor"
+    },
+    "dest": {
+      "domain": "supplier",
+      "kind": "entity_set",
+      "name": "supplier.purchase_order"
+    },
+    "entity_link_type": "related_to"
+  }
+}

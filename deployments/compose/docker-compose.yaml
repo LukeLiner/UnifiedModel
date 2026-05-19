@@ -1,0 +1,13 @@
+services:
+  umodel-server:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile
+    command: ["--addr", ":8080", "--data", "/data", "--graphstore", "file.memory"]
+    ports:
+      - "8080:8080"
+    volumes:
+      - umodel-data:/data
+
+volumes:
+  umodel-data: {}

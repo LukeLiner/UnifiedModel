@@ -1,0 +1,116 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "game.server",
+    "display_name": {
+      "zh_cn": "区服",
+      "en_us": "Server"
+    },
+    "description": {
+      "zh_cn": "区服实体",
+      "en_us": "Server entity"
+    },
+    "domain": "game"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "server_id",
+        "display_name": {
+          "zh_cn": "区服ID",
+          "en_us": "Server ID"
+        },
+        "description": {
+          "zh_cn": "区服ID",
+          "en_us": "Server id"
+        },
+        "type": "string",
+        "example": "S1"
+      },
+      {
+        "name": "server_name",
+        "display_name": {
+          "zh_cn": "区服名",
+          "en_us": "Server Name"
+        },
+        "description": {
+          "zh_cn": "区服名",
+          "en_us": "Server name"
+        },
+        "type": "string",
+        "example": "霸业一区"
+      },
+      {
+        "name": "status",
+        "display_name": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "description": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "type": "string",
+        "example": "online"
+      },
+      {
+        "name": "region",
+        "display_name": {
+          "zh_cn": "区域",
+          "en_us": "Region"
+        },
+        "description": {
+          "zh_cn": "区域",
+          "en_us": "Region"
+        },
+        "type": "string",
+        "example": "华东"
+      },
+      {
+        "name": "maintenance_flag",
+        "display_name": {
+          "zh_cn": "维护标记",
+          "en_us": "Maintenance Flag"
+        },
+        "description": {
+          "zh_cn": "维护标记",
+          "en_us": "Maintenance flag"
+        },
+        "type": "string",
+        "example": "false"
+      },
+      {
+        "name": "maintenance_reason",
+        "display_name": {
+          "zh_cn": "维护原因",
+          "en_us": "Maintenance Reason"
+        },
+        "description": {
+          "zh_cn": "维护原因",
+          "en_us": "Maintenance reason"
+        },
+        "type": "string",
+        "example": "rolling_patch_login_gateway"
+      }
+    ],
+    "primary_key_fields": [
+      "server_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(server_id as varbinary))))",
+    "name_fields": [
+      "server_name",
+      "region",
+      "status"
+    ],
+    "ordered_fields": [
+      "server_name",
+      "status"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

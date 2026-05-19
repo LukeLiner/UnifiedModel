@@ -1,0 +1,168 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "automaker.production_order",
+    "display_name": {
+      "zh_cn": "生产工单",
+      "en_us": "Production Order"
+    },
+    "description": {
+      "zh_cn": "生产工单实体",
+      "en_us": "Production order entity"
+    },
+    "domain": "automaker"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "order_id",
+        "display_name": {
+          "zh_cn": "工单ID",
+          "en_us": "Order ID"
+        },
+        "description": {
+          "zh_cn": "工单编号",
+          "en_us": "Order id"
+        },
+        "type": "string",
+        "example": "PO-1002"
+      },
+      {
+        "name": "factory_id",
+        "display_name": {
+          "zh_cn": "工厂ID",
+          "en_us": "Factory ID"
+        },
+        "description": {
+          "zh_cn": "所属工厂",
+          "en_us": "Factory id"
+        },
+        "type": "string",
+        "example": "FAC-EAST"
+      },
+      {
+        "name": "factory_name",
+        "display_name": {
+          "zh_cn": "工厂名称",
+          "en_us": "Factory Name"
+        },
+        "description": {
+          "zh_cn": "工厂名称",
+          "en_us": "Factory name"
+        },
+        "type": "string",
+        "example": "华东电驱厂"
+      },
+      {
+        "name": "line_id",
+        "display_name": {
+          "zh_cn": "产线ID",
+          "en_us": "Line ID"
+        },
+        "description": {
+          "zh_cn": "产线标识",
+          "en_us": "Production line id"
+        },
+        "type": "string",
+        "example": "LINE-EAST-01"
+      },
+      {
+        "name": "model",
+        "display_name": {
+          "zh_cn": "车型",
+          "en_us": "Model"
+        },
+        "description": {
+          "zh_cn": "车型",
+          "en_us": "Model"
+        },
+        "type": "string",
+        "example": "E9"
+      },
+      {
+        "name": "quantity",
+        "display_name": {
+          "zh_cn": "计划数量",
+          "en_us": "Planned Quantity"
+        },
+        "description": {
+          "zh_cn": "计划数量",
+          "en_us": "Planned quantity"
+        },
+        "type": "integer",
+        "example": 6
+      },
+      {
+        "name": "completed_units",
+        "display_name": {
+          "zh_cn": "已完成数",
+          "en_us": "Completed Units"
+        },
+        "description": {
+          "zh_cn": "已完成数",
+          "en_us": "Completed units"
+        },
+        "type": "integer",
+        "example": 3
+      },
+      {
+        "name": "current_defect_rate",
+        "display_name": {
+          "zh_cn": "当前缺陷率",
+          "en_us": "Current Defect Rate"
+        },
+        "description": {
+          "zh_cn": "当前缺陷率",
+          "en_us": "Current defect rate"
+        },
+        "type": "float",
+        "example": 0.082
+      },
+      {
+        "name": "last_event_type",
+        "display_name": {
+          "zh_cn": "最近事件类型",
+          "en_us": "Last Event Type"
+        },
+        "description": {
+          "zh_cn": "最近事件类型",
+          "en_us": "Latest event type"
+        },
+        "type": "string",
+        "example": "quality_hold"
+      },
+      {
+        "name": "status",
+        "display_name": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "description": {
+          "zh_cn": "工单状态",
+          "en_us": "Order status"
+        },
+        "type": "string",
+        "example": "in_progress"
+      }
+    ],
+    "primary_key_fields": [
+      "order_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(order_id as varbinary))))",
+    "name_fields": [
+      "order_id",
+      "factory_name",
+      "model"
+    ],
+    "ordered_fields": [
+      "order_id",
+      "status"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

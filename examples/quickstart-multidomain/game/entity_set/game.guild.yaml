@@ -1,0 +1,103 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "game.guild",
+    "display_name": {
+      "zh_cn": "公会",
+      "en_us": "Guild"
+    },
+    "description": {
+      "zh_cn": "公会实体",
+      "en_us": "Guild entity"
+    },
+    "domain": "game"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "guild_id",
+        "display_name": {
+          "zh_cn": "公会ID",
+          "en_us": "Guild ID"
+        },
+        "description": {
+          "zh_cn": "公会ID",
+          "en_us": "Guild id"
+        },
+        "type": "string",
+        "example": "GUILD-01"
+      },
+      {
+        "name": "guild_name",
+        "display_name": {
+          "zh_cn": "公会名",
+          "en_us": "Guild Name"
+        },
+        "description": {
+          "zh_cn": "公会名",
+          "en_us": "Guild name"
+        },
+        "type": "string",
+        "example": "龙城"
+      },
+      {
+        "name": "server_id",
+        "display_name": {
+          "zh_cn": "区服ID",
+          "en_us": "Server ID"
+        },
+        "description": {
+          "zh_cn": "区服ID",
+          "en_us": "Server id"
+        },
+        "type": "string",
+        "example": "S1"
+      },
+      {
+        "name": "power_score",
+        "display_name": {
+          "zh_cn": "公会战力",
+          "en_us": "Power Score"
+        },
+        "description": {
+          "zh_cn": "公会战力",
+          "en_us": "Guild power"
+        },
+        "type": "integer",
+        "example": 8800
+      },
+      {
+        "name": "status",
+        "display_name": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "description": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "type": "string",
+        "example": "active"
+      }
+    ],
+    "primary_key_fields": [
+      "guild_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(guild_id as varbinary))))",
+    "name_fields": [
+      "guild_name",
+      "server_id",
+      "status"
+    ],
+    "ordered_fields": [
+      "guild_name",
+      "status"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "kind": "entity_set_link",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "game.guild_contains_game.character",
+    "display_name": {
+      "zh_cn": "公会包含角色",
+      "en_us": "Guild Contains Character"
+    },
+    "description": {
+      "zh_cn": "公会包含角色",
+      "en_us": "Guild contains character"
+    },
+    "domain": "game"
+  },
+  "spec": {
+    "src": {
+      "domain": "game",
+      "kind": "entity_set",
+      "name": "game.guild"
+    },
+    "dest": {
+      "domain": "game",
+      "kind": "entity_set",
+      "name": "game.character"
+    },
+    "entity_link_type": "contains"
+  }
+}

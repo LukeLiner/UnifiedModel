@@ -1,0 +1,27 @@
+### Initialize
+POST http://127.0.0.1:8090/mcp
+Content-Type: application/json
+MCP-Protocol-Version: 2025-06-18
+
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","workspace":"demo"}}
+
+### List tools
+POST http://127.0.0.1:8090/mcp
+Content-Type: application/json
+MCP-Protocol-Version: 2025-06-18
+
+{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{"workspace":"demo"}}
+
+### Call a query tool. The MCP JSON-RPC envelope is JSON; content[0].text is TOON.
+POST http://127.0.0.1:8090/mcp
+Content-Type: application/json
+MCP-Protocol-Version: 2025-06-18
+
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"workspace":"demo","name":"query_spl_examples","arguments":{}}}
+
+### Read a metadata resource. contents[0].mimeType is text/toon.
+POST http://127.0.0.1:8090/mcp
+Content-Type: application/json
+MCP-Protocol-Version: 2025-06-18
+
+{"jsonrpc":"2.0","id":4,"method":"resources/read","params":{"workspace":"demo","uri":"umodel://workspace/demo/overview"}}

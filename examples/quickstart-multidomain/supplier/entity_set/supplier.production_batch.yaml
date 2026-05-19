@@ -1,0 +1,194 @@
+{
+  "kind": "entity_set",
+  "schema": {
+    "url": "umodel.aliyun.com",
+    "version": "v0.1.0"
+  },
+  "metadata": {
+    "name": "supplier.production_batch",
+    "display_name": {
+      "zh_cn": "生产批次",
+      "en_us": "Production Batch"
+    },
+    "description": {
+      "zh_cn": "生产批次实体",
+      "en_us": "Production batch entity"
+    },
+    "domain": "supplier"
+  },
+  "spec": {
+    "fields": [
+      {
+        "name": "batch_id",
+        "display_name": {
+          "zh_cn": "批次ID",
+          "en_us": "Batch ID"
+        },
+        "description": {
+          "zh_cn": "批次ID",
+          "en_us": "Batch id"
+        },
+        "type": "string",
+        "example": "BAT-7001"
+      },
+      {
+        "name": "line_id",
+        "display_name": {
+          "zh_cn": "产线ID",
+          "en_us": "Line ID"
+        },
+        "description": {
+          "zh_cn": "产线ID",
+          "en_us": "Line id"
+        },
+        "type": "string",
+        "example": "LINE-A"
+      },
+      {
+        "name": "source_lot_id",
+        "display_name": {
+          "zh_cn": "原料批次ID",
+          "en_us": "Source Lot ID"
+        },
+        "description": {
+          "zh_cn": "原料批次ID",
+          "en_us": "Source lot id"
+        },
+        "type": "string",
+        "example": "MAT-5001"
+      },
+      {
+        "name": "source_vendor_id",
+        "display_name": {
+          "zh_cn": "来源供应商ID",
+          "en_us": "Source Vendor ID"
+        },
+        "description": {
+          "zh_cn": "来源供应商ID",
+          "en_us": "Source vendor id"
+        },
+        "type": "string",
+        "example": "VND-PC"
+      },
+      {
+        "name": "source_vendor_name",
+        "display_name": {
+          "zh_cn": "来源供应商名称",
+          "en_us": "Source Vendor Name"
+        },
+        "description": {
+          "zh_cn": "来源供应商名称",
+          "en_us": "Source vendor name"
+        },
+        "type": "string",
+        "example": "华南电芯"
+      },
+      {
+        "name": "source_material_type",
+        "display_name": {
+          "zh_cn": "来源物料类型",
+          "en_us": "Source Material Type"
+        },
+        "description": {
+          "zh_cn": "来源物料类型",
+          "en_us": "Source material type"
+        },
+        "type": "string",
+        "example": "cell"
+      },
+      {
+        "name": "product_family",
+        "display_name": {
+          "zh_cn": "产品族",
+          "en_us": "Product Family"
+        },
+        "description": {
+          "zh_cn": "产品族",
+          "en_us": "Product family"
+        },
+        "type": "string",
+        "example": "battery_pack"
+      },
+      {
+        "name": "planned_units",
+        "display_name": {
+          "zh_cn": "计划数量",
+          "en_us": "Planned Units"
+        },
+        "description": {
+          "zh_cn": "计划数量",
+          "en_us": "Planned units"
+        },
+        "type": "integer",
+        "example": 120
+      },
+      {
+        "name": "good_units",
+        "display_name": {
+          "zh_cn": "良品数",
+          "en_us": "Good Units"
+        },
+        "description": {
+          "zh_cn": "良品数",
+          "en_us": "Good units"
+        },
+        "type": "integer",
+        "example": 96
+      },
+      {
+        "name": "yield_rate",
+        "display_name": {
+          "zh_cn": "良率",
+          "en_us": "Yield Rate"
+        },
+        "description": {
+          "zh_cn": "当前良率",
+          "en_us": "Current yield rate"
+        },
+        "type": "float",
+        "example": 0.8
+      },
+      {
+        "name": "root_cause",
+        "display_name": {
+          "zh_cn": "根因",
+          "en_us": "Root Cause"
+        },
+        "description": {
+          "zh_cn": "当前质量根因",
+          "en_us": "Current quality root cause"
+        },
+        "type": "string",
+        "example": "cell_voltage_variance"
+      },
+      {
+        "name": "status",
+        "display_name": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "description": {
+          "zh_cn": "状态",
+          "en_us": "Status"
+        },
+        "type": "string",
+        "example": "running"
+      }
+    ],
+    "primary_key_fields": [
+      "batch_id"
+    ],
+    "id_generator": "lower(to_hex(md5(cast(batch_id as varbinary))))",
+    "name_fields": [
+      "batch_id",
+      "product_family",
+      "source_vendor_name"
+    ],
+    "ordered_fields": [
+      "batch_id",
+      "status"
+    ],
+    "first_observed_time_field": "__first_observed_time__",
+    "last_observed_time_field": "__last_observed_time__"
+  }
+}

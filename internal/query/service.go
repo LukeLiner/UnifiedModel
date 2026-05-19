@@ -1,0 +1,79 @@
+package query
+
+import (
+	"context"
+
+	"github.com/alibaba/UnifiedModel/pkg/model"
+)
+
+type graphStore interface {
+	GetUModelSnapshot(ctx context.Context, req model.UModelSnapshotRequest) (model.UModelSnapshot, error)
+	QueryEntities(ctx context.Context, plan model.EntityQueryPlan) (model.QueryResult, error)
+	QueryTopo(ctx context.Context, plan model.TopoQueryPlan) (model.QueryResult, error)
+	Capabilities(ctx context.Context) (model.GraphStoreCapabilities, error)
+	Health(ctx context.Context) (model.GraphStoreHealth, error)
+}
+
+type Service struct {
+	graph    graphStore
+	planner  Planner
+	executor *Executor
+}
+
+func NewService(graph graphStore) *Service {
+	return &Service{
+		graph:    graph,
+		planner:  Planner{},
+		executor: NewExecutor(graph),
+	}
+}
+
+func (s *Service) Execute(ctx context.Context, workspace string, req model.QueryRequest) (model.QueryResult, error) {
+	plan, caps, health, err := s.plan(ctx, workspace, req)
+	if err != nil {
+		return model.QueryResult{}, err
+	}
+	result, err := s.executor.Execute(ctx, workspace, plan)
+	if err != nil {
+		return model.QueryResult{}, err
+	}
+	explain := buildExplain(plan, caps, health)
+	result.Explain = &explain
+	return result, nil
+}
+
+func (s *Service) Explain(ctx context.Context, workspace string, req model.QueryRequest) (model.QueryExplain, error) {
+	plan, caps, health, err := s.plan(ctx, workspace, req)
+	if err != nil {
+		return model.QueryExplain{}, err
+	}
+	return buildExplain(plan, caps, health), nil
+}
+
+func (s *Service) Examples(ctx context.Context) ([]string, error) {
+	return []string{
+		".umodel with(kind='entity_set') | project domain,name,kind | sort domain,name | limit 20",
+		".entity with(domain='devops', name='devops.service', query='checkout', topk=20)",
+		".entity with(domain='k8s', name='k8s.workload', query='checkout', topk=20)",
+		".topo | graph-call getNeighborNodes('full', 2, [(:\"devops@devops.service\" {__entity_id__: '10000000000000000000000000000101'})]) | limit 20",
+		".topo | graph-call getDirectRelations([(:\"devops@devops.service\" {__entity_id__: '10000000000000000000000000000101'})]) | limit 20",
+		".topo | graph-call cypher(`MATCH (n) RETURN n LIMIT 20`)",
+	}, nil
+}
+
+func (s *Service) plan(ctx context.Context, workspace string, req model.QueryRequest) (model.QueryPlan, model.GraphStoreCapabilities, model.GraphStoreHealth, error) {
+	caps, err := s.graph.Capabilities(ctx)
+	if err != nil {
+		return model.QueryPlan{}, model.GraphStoreCapabilities{}, model.GraphStoreHealth{}, err
+	}
+	plan, err := s.planner.Plan(req, caps)
+	if err != nil {
+		return model.QueryPlan{}, model.GraphStoreCapabilities{}, model.GraphStoreHealth{}, err
+	}
+	plan.Workspace = workspace
+	health, err := s.graph.Health(ctx)
+	if err != nil {
+		return model.QueryPlan{}, model.GraphStoreCapabilities{}, model.GraphStoreHealth{}, err
+	}
+	return plan, caps, health, nil
+}

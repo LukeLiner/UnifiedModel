@@ -1,0 +1,890 @@
+openapi: 3.1.0
+info:
+  title: UModel Open Source API
+  version: 0.1.0
+  description: Public REST contract for the UModel open-source service.
+servers:
+  - url: http://localhost:8080
+paths:
+  /:
+    get:
+      operationId: getServiceIndex
+      responses:
+        "200":
+          description: Service index with health and common endpoint hints.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceIndexResponse"
+  /healthz:
+    get:
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service health.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /api/v1/workspaces:
+    post:
+      operationId: createWorkspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkspaceRequest"
+      responses:
+        "201":
+          description: Workspace metadata created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceMetadata"
+        "409":
+          $ref: "#/components/responses/Error"
+    get:
+      operationId: listWorkspaces
+      parameters:
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: page_token
+          in: query
+          schema:
+            type: string
+        - name: include_deleted
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: include_conflicts
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Workspace metadata page.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspacePage"
+  /api/v1/workspaces/{workspace}:
+    parameters:
+      - $ref: "#/components/parameters/Workspace"
+    get:
+      operationId: getWorkspace
+      responses:
+        "200":
+          description: Active workspace metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceMetadata"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+    put:
+      operationId: updateWorkspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWorkspaceRequest"
+      responses:
+        "200":
+          description: Updated workspace metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceMetadata"
+        "409":
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteWorkspace
+      responses:
+        "200":
+          description: Soft-deleted workspace metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceMetadata"
+        "409":
+          $ref: "#/components/responses/Error"
+  /api/v1/umodel/{workspace}/validate:
+    post:
+      operationId: validateUModel
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UModelElementBatch"
+      responses:
+        "200":
+          description: Validation result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationResult"
+  /api/v1/umodel/{workspace}/import:
+    post:
+      operationId: importUModel
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UModelImportRequest"
+      responses:
+        "200":
+          description: UModel elements imported from a local YAML/JSON file or directory.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UModelImportResult"
+  /api/v1/umodel/{workspace}/elements:
+    post:
+      operationId: putUModelElements
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UModelElementBatch"
+      responses:
+        "200":
+          description: UModel elements accepted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WriteResult"
+    delete:
+      operationId: deleteUModelElements
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteUModelElementsRequest"
+      responses:
+        "200":
+          description: UModel elements deleted when dependency checks pass.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WriteResult"
+  /api/v1/entitystore/{workspace}/entities:write:
+    post:
+      operationId: writeEntities
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntityWriteBatch"
+      responses:
+        "200":
+          description: CMS 2.0 compatible entity write result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WriteResult"
+  /api/v1/entitystore/{workspace}/entities:expire:
+    post:
+      operationId: expireEntities
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpireRequest"
+      responses:
+        "200":
+          description: Entity expire result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WriteResult"
+  /api/v1/entitystore/{workspace}/relations:write:
+    post:
+      operationId: writeRelations
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RelationWriteBatch"
+      responses:
+        "200":
+          description: CMS 2.0 compatible relation write result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WriteResult"
+  /api/v1/entitystore/{workspace}/relations:expire:
+    post:
+      operationId: expireRelations
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpireRequest"
+      responses:
+        "200":
+          description: Relation expire result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WriteResult"
+  /api/v1/samples/{workspace}/multi-domain-quickstart:import:
+    post:
+      operationId: importMultiDomainQuickstartSample
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      responses:
+        "200":
+          description: Bundled multi-domain quickstart sample imported into UModel, EntityStore, and topology.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SampleImportResult"
+  /api/v1/query/{workspace}/execute:
+    post:
+      operationId: executeQuery
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QueryRequest"
+      responses:
+        "200":
+          description: Unified SPL query result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueryResult"
+  /api/v1/query/{workspace}/explain:
+    post:
+      operationId: explainQuery
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QueryRequest"
+      responses:
+        "200":
+          description: Unified SPL explain result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueryExplain"
+  /api/v1/agent/{workspace}/discover:
+    get:
+      operationId: discoverAgentCapabilities
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      responses:
+        "200":
+          description: Agent discovery metadata and SPL next actions.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentDiscovery"
+  /api/v1/agent/{workspace}/tools:execute:
+    post:
+      operationId: executeAgentTool
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentToolCallRequest"
+      responses:
+        "200":
+          description: Agent tool call result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentToolCallResult"
+        "400":
+          $ref: "#/components/responses/Error"
+  /api/v1/agent/{workspace}/resources:read:
+    post:
+      operationId: readAgentResource
+      parameters:
+        - $ref: "#/components/parameters/Workspace"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentResourceReadRequest"
+      responses:
+        "200":
+          description: Safe agent resource metadata or templates.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentResourceReadResult"
+        "404":
+          $ref: "#/components/responses/Error"
+components:
+  parameters:
+    Workspace:
+      name: workspace
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[a-z0-9](?:[a-z0-9_-]{0,62}[a-z0-9])?$"
+  responses:
+    Error:
+      description: Stable error envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+  schemas:
+    ServiceIndexResponse:
+      type: object
+      required: [service, status, graphstore, endpoints]
+      properties:
+        service:
+          type: string
+        status:
+          type: string
+        graphstore:
+          $ref: "#/components/schemas/GraphStoreHealth"
+        endpoints:
+          type: object
+          additionalProperties:
+            type: string
+    HealthResponse:
+      type: object
+      required: [status, graphstore]
+      properties:
+        status:
+          type: string
+        graphstore:
+          $ref: "#/components/schemas/GraphStoreHealth"
+    GraphStoreHealth:
+      type: object
+      required: [provider, status]
+      properties:
+        provider:
+          type: string
+          description: Active GraphStore provider, for example memory, file.memory, or local.ladybug.
+        status:
+          type: string
+        message:
+          type: string
+    CreateWorkspaceRequest:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+        config:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties: true
+    UpdateWorkspaceRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+        config:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties: true
+        if_match_version:
+          type: integer
+        replace_labels:
+          type: boolean
+        replace_config:
+          type: boolean
+    WorkspaceMetadata:
+      type: object
+      required: [id, name, paths, status, resource_version, created_at, updated_at]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [active, deleted, conflicted]
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+        config:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties: true
+        paths:
+          $ref: "#/components/schemas/WorkspacePaths"
+        resource_version:
+          type: integer
+          format: uint64
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        deleted_at:
+          type: string
+          format: date-time
+    WorkspacePaths:
+      type: object
+      required: [root]
+      properties:
+        root:
+          type: string
+        tmp:
+          type: string
+    WorkspacePage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkspaceMetadata"
+        next_token:
+          type: string
+    QueryRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          description: Unified SPL string beginning with .umodel, .entity, or .topo.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        timeout_ms:
+          type: integer
+          minimum: 1
+        time_range:
+          $ref: "#/components/schemas/TimeRange"
+        format:
+          type: string
+        parameters:
+          type: object
+          additionalProperties: true
+    TimeRange:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+    QueryResult:
+      type: object
+      required: [columns, rows, page]
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        page:
+          type: object
+          properties:
+            limit:
+              type: integer
+            page_token:
+              type: string
+        explain:
+          $ref: "#/components/schemas/QueryExplain"
+    QueryExplain:
+      type: object
+      properties:
+        source:
+          type: string
+          enum: [.umodel, .entity, .topo]
+        provider:
+          type: string
+          description: Active GraphStore provider that planned the query.
+        storage_provider:
+          type: string
+          description: Storage provider used for query execution; currently mirrors provider.
+        pushdown:
+          type: array
+          items:
+            type: string
+        fallback:
+          type: array
+          items:
+            type: string
+        operators:
+          type: array
+          items:
+            type: string
+        depth:
+          type: integer
+        limit:
+          type: integer
+        timeout_ms:
+          type: integer
+        time_range_applied:
+          type: boolean
+    UModelElementBatch:
+      type: object
+      required: [elements]
+      properties:
+        workspace:
+          type: string
+        elements:
+          type: array
+          items:
+            $ref: "#/components/schemas/UModelElement"
+    UModelImportRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Local YAML/JSON file or directory path readable by the server process.
+        common_schema_packs:
+          type: array
+          items:
+            type: string
+          description: Reserved hook for future CommonSchema pack loading.
+    UModelImportResult:
+      type: object
+      required: [workspace, source, imported, skipped]
+      properties:
+        workspace:
+          type: string
+        source:
+          type: string
+        imported:
+          type: integer
+        skipped:
+          type: integer
+        elements:
+          type: array
+          items:
+            $ref: "#/components/schemas/UModelElement"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ErrorDetail"
+    SampleImportResult:
+      type: object
+      required: [workspace, sample, umodel, entities, relations, entity_count, relation_count]
+      properties:
+        workspace:
+          type: string
+        sample:
+          type: string
+          enum: [multi-domain-quickstart]
+        umodel:
+          $ref: "#/components/schemas/UModelImportResult"
+        entities:
+          $ref: "#/components/schemas/WriteResult"
+        relations:
+          $ref: "#/components/schemas/WriteResult"
+        entity_count:
+          type: integer
+        relation_count:
+          type: integer
+    DeleteUModelElementsRequest:
+      type: object
+      required: [ids]
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+    ValidationResult:
+      type: object
+      required: [valid]
+      properties:
+        valid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ErrorDetail"
+    UModelElement:
+      type: object
+      required: [kind, domain, name]
+      properties:
+        kind:
+          type: string
+        domain:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        spec:
+          type: object
+          additionalProperties: true
+    EntityWriteBatch:
+      type: object
+      required: [entities]
+      properties:
+        workspace:
+          type: string
+        idempotency_key:
+          type: string
+        partial_success:
+          type: boolean
+        entities:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    RelationWriteBatch:
+      type: object
+      required: [relations]
+      properties:
+        workspace:
+          type: string
+        idempotency_key:
+          type: string
+        partial_success:
+          type: boolean
+        relations:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    ExpireRequest:
+      type: object
+      required: [ids]
+      properties:
+        workspace:
+          type: string
+        ids:
+          type: array
+          items:
+            type: string
+        reason:
+          type: string
+    WriteResult:
+      type: object
+      required: [accepted, failed]
+      properties:
+        accepted:
+          type: integer
+        failed:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/BatchItemResult"
+    BatchItemResult:
+      type: object
+      required: [ok]
+      properties:
+        id:
+          type: string
+        ok:
+          type: boolean
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: "#/components/schemas/ErrorDetail"
+    ErrorDetail:
+      type: object
+      properties:
+        field:
+          type: string
+        reason:
+          type: string
+        limit:
+          type: string
+    AgentTool:
+      type: object
+      required: [name, description, enabled]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        enabled:
+          type: boolean
+        requires_explicit_write_enable:
+          type: boolean
+        input_schema:
+          nullable: true
+        output_schema:
+          nullable: true
+    AgentResource:
+      type: object
+      required: [uri, name, kind, description, mime_type, read_only]
+      properties:
+        uri:
+          type: string
+        name:
+          type: string
+        kind:
+          type: string
+        description:
+          type: string
+        mime_type:
+          type: string
+        read_only:
+          type: boolean
+    AgentQueryAction:
+      type: object
+      required: [method, path, body]
+      properties:
+        method:
+          type: string
+        path:
+          type: string
+        body:
+          $ref: "#/components/schemas/QueryRequest"
+    AgentNextAction:
+      type: object
+      required: [id, title, description, tool, query_api]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        tool:
+          type: string
+        query_api:
+          $ref: "#/components/schemas/AgentQueryAction"
+    AgentDiscovery:
+      type: object
+      required: [workspace, tools, resources]
+      properties:
+        workspace:
+          type: string
+        tools:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentTool"
+        resources:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentResource"
+        next_actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentNextAction"
+    AgentToolCallRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        arguments:
+          type: object
+          additionalProperties: true
+    AgentToolCallResult:
+      type: object
+      required: [name, ok]
+      properties:
+        name:
+          type: string
+        ok:
+          type: boolean
+        output:
+          nullable: true
+        error:
+          nullable: true
+    AgentResourceReadRequest:
+      type: object
+      required: [uri]
+      properties:
+        uri:
+          type: string
+    AgentResourceReadResult:
+      type: object
+      required: [uri, mime_type, content]
+      properties:
+        uri:
+          type: string
+        mime_type:
+          type: string
+        content:
+          nullable: true
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, retryable]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            retryable:
+              type: boolean

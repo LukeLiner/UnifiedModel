@@ -1,0 +1,551 @@
+/* UModel HTML文档生成器样式文件 */
+/* 使用Python字符串格式化来插入配置变量 */
+
+* {{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}}
+
+body {{
+    font-family: {font_family};
+    line-height: {line_height};
+    color: {text_color};
+    background-color: {background_color};
+    font-size: {font_size};
+}}
+
+.container {{
+    display: flex;
+    min-height: 100vh;
+}}
+
+/* 侧边栏样式 */
+.sidebar {{
+    width: {sidebar_width};
+    background: {sidebar_background};
+    border-right: 1px solid {sidebar_border_color};
+    padding: {sidebar_padding};
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: {sidebar_shadow};
+}}
+
+.sidebar h3 {{
+    font-size: {sidebar_title_font_size};
+    margin-bottom: {sidebar_title_margin_bottom};
+    color: {primary_color};
+}}
+
+/* 目录样式 */
+.toc-tree {{
+    list-style: none;
+}}
+
+.toc-item {{
+    margin: {toc_item_margin};
+    display: flex;
+    align-items: center;
+}}
+
+.toc-toggle {{
+    width: {toc_toggle_size};
+    height: {toc_toggle_size};
+    font-size: {toc_toggle_font_size};
+    margin-right: {toc_toggle_margin_right};
+    cursor: pointer;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: {secondary_color};
+}}
+
+.toc-spacer {{
+    width: {toc_toggle_size};
+    margin-right: {toc_toggle_margin_right};
+    display: inline-block;
+}}
+
+.toc-link {{
+    display: block;
+    padding: {toc_link_padding};
+    text-decoration: none;
+    color: {text_color};
+    border-radius: {toc_link_border_radius};
+    font-size: {toc_link_font_size};
+    transition: all {transition_duration} ease;
+}}
+
+.toc-link:hover {{
+    background-color: {hover_bg_color};
+    color: {primary_color};
+}}
+
+.toc-link.level-1 {{
+    font-size: {toc_level1_font_size};
+    font-weight: 600;
+}}
+
+.toc-link.level-2 {{
+    font-size: {toc_level2_font_size};
+}}
+
+.toc-link.level-3 {{
+    font-size: {toc_level3_font_size};
+}}
+
+.toc-children {{
+    list-style: none;
+    margin-left: {toc_children_margin_left};
+    padding-left: {toc_children_padding_left};
+    border-left: 1px solid {border_color};
+}}
+
+.toc-children.collapsed {{
+    display: none;
+}}
+
+/* 主内容区样式 */
+.main-content {{
+    margin-left: {main_margin_left};
+    padding: {main_padding};
+    flex: 1;
+    max-width: 1400px;
+    margin-right: auto;
+}}
+
+/* 标题样式 */
+.header {{
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: {header_padding};
+    border-radius: {header_border_radius};
+    margin-bottom: {header_margin_bottom};
+    box-shadow: {header_shadow};
+}}
+
+.main-title {{
+    font-size: {header_title_font_size};
+    margin-bottom: {header_title_margin_bottom};
+}}
+
+/* 章节样式 */
+section {{
+    background: white;
+    padding: {section_padding};
+    border-radius: {section_border_radius};
+    margin-bottom: {section_margin_bottom};
+    box-shadow: {section_shadow};
+}}
+
+section h2 {{
+    color: {primary_color};
+    font-size: {section_title_font_size};
+    margin-bottom: {section_title_margin_bottom};
+    padding-bottom: {section_title_padding_bottom};
+    border-bottom: {section_title_border_width} solid {border_color};
+}}
+
+/* 描述项样式 */
+.description-item {{
+    margin-bottom: {desc_item_margin_bottom};
+    padding: {desc_item_padding};
+    background: {light_color};
+    border-radius: {desc_item_border_radius};
+    border-left: {desc_item_border_width} solid {blue_border_color};
+}}
+
+.description-item h3 {{
+    margin-bottom: {desc_subtitle_margin_bottom};
+    font-size: {desc_subtitle_font_size};
+    color: {primary_color};
+}}
+
+.description-text {{
+    font-size: {desc_text_font_size};
+    line-height: {desc_text_line_height};
+}}
+
+/* 版本卡片样式 */
+.version-card {{
+    margin-bottom: {version_card_margin_bottom};
+    border: 1px solid {border_color};
+    border-radius: {version_card_border_radius};
+    overflow: hidden;
+    box-shadow: {version_card_shadow};
+}}
+
+.version-title {{
+    background: {gradient_secondary};
+    color: white;
+    padding: {version_title_padding};
+    margin: 0;
+    font-size: {version_title_font_size};
+}}
+
+.version-description {{
+    padding: {version_description_padding};
+    background: {light_color};
+    border-bottom: 1px solid {border_color};
+}}
+
+.spec-section {{
+    padding: {version_spec_padding};
+}}
+
+.spec-section h4 {{
+    color: {primary_color};
+    margin-bottom: {version_spec_title_margin_bottom};
+    font-size: {version_spec_title_font_size};
+}}
+
+/* 属性概览样式 */
+.properties-overview {{
+    margin-bottom: {overview_margin_bottom};
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}}
+
+.properties-overview h5 {{
+    margin-bottom: {overview_title_margin_bottom};
+    color: {primary_color};
+    font-size: {overview_title_font_size};
+}}
+
+.overview-grid {{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax({overview_grid_min_width}, 1fr));
+    gap: {overview_grid_gap};
+}}
+
+.overview-item {{
+    border: 1px solid {border_color};
+    border-radius: {overview_item_border_radius};
+    overflow: hidden;
+    transition: all {hover_transition} ease;
+    background: white;
+}}
+
+.overview-item:hover {{
+    transform: {overview_hover_transform};
+    box-shadow: {overview_hover_shadow};
+    border-color: {primary_color};
+}}
+
+.overview-link {{
+    display: block;
+    padding: {overview_item_padding};
+    text-decoration: none;
+    color: inherit;
+}}
+
+.overview-header {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: {overview_header_margin_bottom};
+}}
+
+.overview-name {{
+    font-weight: 600;
+    font-size: {overview_name_font_size};
+    color: {primary_color};
+}}
+
+.overview-desc {{
+    font-size: {overview_desc_font_size};
+    color: {secondary_color};
+    line-height: 1.4;
+}}
+
+/* 属性详情样式 */
+.property-detail {{
+    margin-bottom: {property_detail_margin_bottom};
+    border: 1px solid {border_color};
+    border-radius: {property_detail_border_radius};
+    overflow: hidden;
+    box-shadow: {property_detail_shadow};
+}}
+
+.property-header {{
+    background: #f8f9fa;
+    padding: {property_header_padding};
+    border-bottom: 1px solid {border_color};
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}}
+
+.property-name {{
+    margin: 0;
+    font-size: {property_name_font_size};
+    color: {primary_color};
+}}
+
+.property-badges {{
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}}
+
+/* 类型标签样式 */
+.type-badge {{
+    display: inline-block;
+    padding: {type_badge_padding};
+    border-radius: {type_badge_border_radius};
+    font-size: {type_badge_font_size};
+    font-weight: 500;
+    letter-spacing: {type_badge_letter_spacing};
+}}
+
+{type_badge_styles}
+
+/* Release Stage标签样式 */
+.release-stage-badge {{
+    display: inline-block;
+    padding: {release_stage_padding};
+    border-radius: {release_stage_border_radius};
+    font-size: {release_stage_font_size};
+    font-weight: 500;
+    letter-spacing: {release_stage_letter_spacing};
+}}
+
+.property-description {{
+    padding: {property_description_padding};
+}}
+
+.desc-item {{
+    margin-bottom: {property_desc_item_margin_bottom};
+    font-size: {property_desc_item_font_size};
+    line-height: {property_desc_item_line_height};
+}}
+
+.desc-item:last-child {{
+    margin-bottom: 0;
+}}
+
+/* 约束样式 */
+.constraints-section {{
+    padding: {constraint_section_padding};
+    background: #f8f9fa;
+    border-top: 1px solid {border_color};
+}}
+
+.constraints-section h6 {{
+    margin-bottom: {constraint_title_margin_bottom};
+    color: {secondary_color};
+    font-size: {constraint_title_font_size};
+    font-weight: 600;
+}}
+
+.constraints-list {{
+    display: flex;
+    flex-wrap: wrap;
+    gap: {constraint_list_gap};
+}}
+
+.constraint-item {{
+    display: flex;
+    align-items: center;
+    padding: {constraint_item_padding};
+    background: white;
+    border: 1px solid {border_color};
+    border-radius: {constraint_item_border_radius};
+    font-size: {constraint_item_font_size};
+}}
+
+.constraint-item.full-width {{
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+}}
+
+.constraint-label {{
+    font-weight: 600;
+    color: {secondary_color};
+    margin-right: {constraint_label_margin_right};
+}}
+
+.constraint-value {{
+    background: #e3f2fd;
+    padding: {constraint_value_padding};
+    border-radius: {constraint_value_border_radius};
+    font-size: {constraint_value_font_size};
+    color: #1976d2;
+}}
+
+.enum-values {{
+    display: flex;
+    flex-wrap: wrap;
+    gap: {constraint_enum_gap};
+    margin-top: {constraint_enum_margin_top};
+}}
+
+.enum-value {{
+    background: #e8f5e9;
+    color: #388e3c;
+    padding: {constraint_enum_padding};
+    border-radius: {constraint_enum_border_radius};
+    font-size: {constraint_enum_font_size};
+}}
+
+/* 新增：嵌套约束样式 */
+.nested-constraint {{
+    margin-top: 8px;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    border-left: 3px solid {primary_color};
+}}
+
+.nested-constraint .constraint-label {{
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+}}
+
+.nested-constraint .constraints-section {{
+    padding: 0;
+    background: transparent;
+    border: none;
+}}
+
+/* 新增：oneOf约束样式 */
+.oneof-options {{
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}}
+
+.oneof-option {{
+    padding: 10px;
+    background: white;
+    border: 1px solid {border_color};
+    border-radius: 4px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}}
+
+.option-number {{
+    font-weight: 600;
+    color: {primary_color};
+    white-space: nowrap;
+}}
+
+.option-desc {{
+    font-size: 13px;
+    color: {secondary_color};
+    margin-left: 8px;
+}}
+
+.option-constraint {{
+    margin-top: 6px;
+    padding-left: 20px;
+}}
+
+/* 新增：高级约束样式 */
+.check-list {{
+    margin-top: 8px;
+    padding: 8px;
+    background: white;
+    border: 1px solid {border_color};
+    border-radius: 4px;
+}}
+
+.check-item {{
+    padding: 4px 0;
+    font-size: 13px;
+    color: {text_color};
+}}
+
+/* 嵌套属性样式 */
+.nested-properties {{
+    margin-top: 12px;
+    padding: {nested_padding};
+    background: #f8f9fa;
+    border-radius: 4px;
+    border-left: 3px solid {blue_border_color};
+}}
+
+.nested-properties h6 {{
+    margin-bottom: {nested_title_margin_bottom};
+    color: {secondary_color};
+    font-size: {nested_title_font_size};
+}}
+
+/* 数组和映射 */
+.array-items, .map-values {{
+    margin-top: 12px;
+    padding: 12px;
+    background: #f0f7ff;
+    border-radius: 4px;
+    border-left: 3px solid #2196f3;
+}}
+
+.array-items h6, .map-values h6 {{
+    margin-bottom: 8px;
+    color: #1976d2;
+    font-size: 14px;
+}}
+
+/* 滚动条样式 */
+.sidebar::-webkit-scrollbar {{
+    width: {scrollbar_width};
+}}
+
+.sidebar::-webkit-scrollbar-track {{
+    background: {scrollbar_track_color};
+}}
+
+.sidebar::-webkit-scrollbar-thumb {{
+    background: {scrollbar_thumb_color};
+    border-radius: {scrollbar_thumb_border_radius};
+}}
+
+.sidebar::-webkit-scrollbar-thumb:hover {{
+    background: {scrollbar_thumb_hover_color};
+}}
+
+/* 响应式设计 */
+@media (max-width: {mobile_breakpoint}) {{
+    .sidebar {{
+        display: none;
+    }}
+    
+    .main-content {{
+        margin-left: 0;
+        padding: {main_mobile_padding};
+    }}
+    
+    .overview-grid {{
+        grid-template-columns: 1fr;
+    }}
+}}
+
+/* 代码样式 */
+code {{
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}}
+
+/* 打印样式 */
+@media print {{
+    .sidebar {{
+        display: none;
+    }}
+    
+    .main-content {{
+        margin-left: 0;
+    }}
+    
+    section {{
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }}
+}} 
