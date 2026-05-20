@@ -117,6 +117,20 @@ func TestExecuteEntityQueryUsesGraphStoreRows(t *testing.T) {
 	if result.Explain == nil || result.Explain.StorageProvider != "memory" {
 		t.Fatalf("unexpected explain: %+v", result.Explain)
 	}
+
+	paramResult, err := svc.Execute(ctx, "demo", model.QueryRequest{
+		Query: ".entity with(domain='apm', name=$name, query=$query) | limit 20",
+		Params: map[string]any{
+			"name":  "apm.service",
+			"query": "cart",
+		},
+	})
+	if err != nil {
+		t.Fatalf("execute parameterized entity query: %v", err)
+	}
+	if len(paramResult.Rows) != 1 || paramResult.Rows[0]["__entity_id__"] != "54013ba69c196820e56801f1ef5aad54" {
+		t.Fatalf("unexpected parameterized entity rows: %+v", paramResult.Rows)
+	}
 }
 
 func TestExecuteEntityTopKAndProject(t *testing.T) {
@@ -228,6 +242,82 @@ func TestExecuteTopoCypherOnMemory(t *testing.T) {
 	}
 	if result.Explain.CypherDialect != "ladybug" || result.Explain.CypherEngine != "go" {
 		t.Fatalf("unexpected cypher explain metadata: %+v", result.Explain)
+	}
+}
+
+func TestExecuteTopoCypherReturnsFullEntityAndRelationProperties(t *testing.T) {
+	ctx := context.Background()
+	store := graphstore.NewMemoryStore()
+	_, err := store.WriteEntities(ctx, model.EntityWriteBatch{
+		Workspace: "demo",
+		Entities: []model.EntityPayload{
+			{
+				"__domain__":              "apm",
+				"__entity_type__":         "apm.service",
+				"__entity_id__":           "54013ba69c196820e56801f1ef5aad54",
+				"__method__":              "Update",
+				"__first_observed_time__": int64(100),
+				"__last_observed_time__":  int64(200),
+				"display_name":            "cart service",
+				"owner":                   "checkout-team",
+			},
+			{
+				"__domain__":              "apm",
+				"__entity_type__":         "apm.service",
+				"__entity_id__":           "177627f91af678a9b03e993f1a91917f",
+				"__method__":              "Update",
+				"__first_observed_time__": int64(100),
+				"__last_observed_time__":  int64(200),
+				"display_name":            "checkout service",
+				"tier":                    "gold",
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("write entities: %v", err)
+	}
+	_, err = store.WriteRelations(ctx, model.RelationWriteBatch{
+		Workspace: "demo",
+		Relations: []model.RelationPayload{{
+			"__src_domain__":          "apm",
+			"__src_entity_type__":     "apm.service",
+			"__src_entity_id__":       "54013ba69c196820e56801f1ef5aad54",
+			"__dest_domain__":         "apm",
+			"__dest_entity_type__":    "apm.service",
+			"__dest_entity_id__":      "177627f91af678a9b03e993f1a91917f",
+			"__relation_type__":       "calls",
+			"__method__":              "Update",
+			"__first_observed_time__": int64(100),
+			"__last_observed_time__":  int64(200),
+			"latency_ms":              int64(12),
+			"criticality":             "high",
+		}},
+	})
+	if err != nil {
+		t.Fatalf("write relation: %v", err)
+	}
+
+	svc := NewService(store)
+	query := ".topo | graph-call cypher(`match (src:``apm@apm.service`` {__entity_id__: $src})-[r:calls]->(dest) return properties(src) as src, properties(r) as relation, properties(dest) as dest`) | limit 20"
+	result, err := svc.Execute(ctx, "demo", model.QueryRequest{Query: query, Params: map[string]any{"src": "54013ba69c196820e56801f1ef5aad54"}})
+	if err != nil {
+		t.Fatalf("execute full property cypher query: %v", err)
+	}
+	if len(result.Rows) != 1 {
+		t.Fatalf("expected one cypher row, got %+v", result.Rows)
+	}
+	row := result.Rows[0]
+	src, ok := row["src"].(map[string]any)
+	if !ok || src["display_name"] != "cart service" || src["owner"] != "checkout-team" {
+		t.Fatalf("unexpected source properties: %#v", row["src"])
+	}
+	relation, ok := row["relation"].(map[string]any)
+	if !ok || relation["latency_ms"] != int64(12) || relation["criticality"] != "high" {
+		t.Fatalf("unexpected relation properties: %#v", row["relation"])
+	}
+	dest, ok := row["dest"].(map[string]any)
+	if !ok || dest["display_name"] != "checkout service" || dest["tier"] != "gold" {
+		t.Fatalf("unexpected destination properties: %#v", row["dest"])
 	}
 }
 

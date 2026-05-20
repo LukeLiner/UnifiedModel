@@ -84,7 +84,7 @@ func TestExplainShowsTopoPushdowns(t *testing.T) {
 	if !containsString(cypherExplain.Pushdown, "graph_call:cypher") || !containsString(cypherExplain.Pushdown, "controlled_cypher") {
 		t.Fatalf("expected cypher pushdown: %+v", cypherExplain)
 	}
-	if cypherExplain.CypherDialect != "ladybug" || cypherExplain.CypherEngine != "ladybug" {
+	if cypherExplain.CypherDialect != "ladybug" || cypherExplain.CypherEngine != "go" {
 		t.Fatalf("expected cypher explain metadata: %+v", cypherExplain)
 	}
 

@@ -65,7 +65,10 @@ func TestLadybugProviderConformance(t *testing.T) {
 
 	if _, err := provider.WriteEntities(ctx, model.EntityWriteBatch{
 		Workspace: "demo",
-		Entities:  []model.EntityPayload{entity("54013ba69c196820e56801f1ef5aad54")},
+		Entities: []model.EntityPayload{
+			entity("54013ba69c196820e56801f1ef5aad54"),
+			entity("177627f91af678a9b03e993f1a91917f"),
+		},
 	}); err != nil {
 		t.Fatalf("write entity: %v", err)
 	}
@@ -122,6 +125,34 @@ func TestLadybugProviderConformance(t *testing.T) {
 	if topoRows.Rows[0]["src"] != "apm/apm.service/54013ba69c196820e56801f1ef5aad54" || topoRows.Rows[0]["dest"] != "apm/apm.service/177627f91af678a9b03e993f1a91917f" || topoRows.Rows[0]["relation"] != "calls" {
 		t.Fatalf("unexpected topo row: %+v", topoRows.Rows[0])
 	}
+	cypherRows, err := provider.QueryTopo(ctx, model.TopoQueryPlan{
+		Workspace: "demo",
+		GraphCall: &model.GraphCallPlan{
+			Name:   "cypher",
+			Cypher: "MATCH (src:`apm@apm.service` {__entity_id__: $src})-[r:calls]->(dest) RETURN properties(src) AS src, properties(r) AS relation, properties(dest) AS dest",
+		},
+		Params: map[string]any{"src": "54013ba69c196820e56801f1ef5aad54"},
+		Limit:  10,
+	})
+	if err != nil {
+		t.Fatalf("query cypher topo properties: %v", err)
+	}
+	if len(cypherRows.Rows) != 1 {
+		t.Fatalf("expected one cypher row, got %+v", cypherRows.Rows)
+	}
+	cypherRow := cypherRows.Rows[0]
+	src, ok := cypherRow["src"].(map[string]any)
+	if !ok || src["display_name"] != "cart service" {
+		t.Fatalf("unexpected cypher source properties: %#v", cypherRow["src"])
+	}
+	relation, ok := cypherRow["relation"].(map[string]any)
+	if !ok || relation["weight"] != "critical" || relation["__relation_type__"] != "calls" {
+		t.Fatalf("unexpected cypher relation properties: %#v", cypherRow["relation"])
+	}
+	dest, ok := cypherRow["dest"].(map[string]any)
+	if !ok || dest["display_name"] != "177627f91af678a9b03e993f1a91917f service" {
+		t.Fatalf("unexpected cypher destination properties: %#v", cypherRow["dest"])
+	}
 
 	provider.Close()
 	reopened, err := NewProvider(graphstore.ProviderConfig{DataRoot: dataRoot})
@@ -153,6 +184,10 @@ func TestLadybugProviderConformance(t *testing.T) {
 }
 
 func entity(id string) model.EntityPayload {
+	displayName := id + " service"
+	if id == "54013ba69c196820e56801f1ef5aad54" {
+		displayName = "cart service"
+	}
 	return model.EntityPayload{
 		"__domain__":              "apm",
 		"__entity_type__":         "apm.service",
@@ -161,7 +196,7 @@ func entity(id string) model.EntityPayload {
 		"__first_observed_time__": int64(100),
 		"__last_observed_time__":  int64(200),
 		"__keep_alive_seconds__":  int64(60),
-		"display_name":            id + " service",
+		"display_name":            displayName,
 	}
 }
 

@@ -53,6 +53,17 @@ go run ./cmd/umctl --addr http://localhost:8080 query run demo ".umodel with(kin
 go run ./cmd/umctl --addr http://localhost:8080 query run demo ".entity with(domain='devops', name='devops.service', query='checkout') | project __entity_id__,display_name | limit 20"
 ```
 
+Agent 和 REST 调用方可以把命名参数绑定到 `with(...)` filters 和 `where` predicates：
+
+```json
+{
+  "query": ".entity with(domain='devops', name='devops.service', query=$query) | limit 20",
+  "parameters": {
+    "query": "checkout"
+  }
+}
+```
+
 ## `.topo`
 
 读取运行时拓扑关系：
@@ -60,6 +71,16 @@ go run ./cmd/umctl --addr http://localhost:8080 query run demo ".entity with(dom
 ```bash
 go run ./cmd/umctl --addr http://localhost:8080 query run demo ".topo | graph-call getDirectRelations([(:\"devops@devops.service\" {__entity_id__: '10000000000000000000000000000101'})]) | project src,relation,dest | limit 20"
 ```
+
+`.topo` 支持 graph-call 风格的拓扑操作。`memory`、`file.memory` 和可选的 `local.ladybug` provider 都通过共享的 Go engine 支持受控只读 Cypher 兼容查询。`local.ladybug` 在使用 `-tags ladybug` 和本地 Ladybug runtime 构建时，仍然把图数据持久化到 Ladybug。
+
+Cypher 可以在一次查询里返回完整实体属性和关系属性：
+
+```bash
+go run ./cmd/umctl --addr http://localhost:8080 query run demo ".topo | graph-call cypher(`MATCH (src)-[r]->(dest) RETURN src, r AS relation, dest LIMIT 20`)"
+```
+
+调用方如果希望显式表达属性 map 返回形态，可以使用 `properties(src)`、`properties(r)` 和 `properties(dest)`。
 
 ## 常用管道操作
 

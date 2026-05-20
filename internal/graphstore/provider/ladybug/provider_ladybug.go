@@ -34,6 +34,7 @@ type workspaceHandle struct {
 
 const (
 	upsertUModelNodeStatement = `MERGE (n:umodel_node {key: $key}) SET n.kind = $kind, n.domain = $domain, n.name = $name, n.version = $version, n.spec = $spec;`
+	deleteUModelNodeStatement = `MATCH (n:umodel_node {key: $key}) DELETE n;`
 	upsertEntityStatement     = `MERGE (e:entity {entity_key: $entity_key}) SET e.domain = $domain, e.entity_type = $entity_type, e.entity_id = $entity_id, e.method = $method, e.first_observed_time = $first_observed_time, e.last_observed_time = $last_observed_time, e.keep_alive_seconds = $keep_alive_seconds, e.deleted = $deleted, e.properties = $properties;`
 	upsertTopoStatement       = `MATCH (s:entity {entity_key: $src_key}), (d:entity {entity_key: $dest_key}) MERGE (s)-[r:topo {relation_key: $relation_key}]->(d) SET r.relation_type = $relation_type, r.method = $method, r.first_observed_time = $first_observed_time, r.last_observed_time = $last_observed_time, r.keep_alive_seconds = $keep_alive_seconds, r.deleted = $deleted, r.properties = $properties;`
 )
@@ -113,6 +114,42 @@ func (p *Provider) PutUModelElements(ctx context.Context, batch model.UModelElem
 		items = append(items, model.BatchItemResult{ID: key, OK: true})
 	}
 	return model.WriteResult{Accepted: len(batch.Elements), Items: items}, nil
+}
+
+func (p *Provider) DeleteUModelElements(ctx context.Context, workspace string, ids []string) (model.WriteResult, error) {
+	conn, err := p.conn(workspace)
+	if err != nil {
+		return model.WriteResult{}, err
+	}
+	stmt, err := conn.Prepare(deleteUModelNodeStatement)
+	if err != nil {
+		return model.WriteResult{}, err
+	}
+	defer stmt.Close()
+
+	items := make([]model.BatchItemResult, 0, len(ids))
+	for _, id := range ids {
+		id = strings.TrimSpace(id)
+		if id == "" {
+			items = append(items, model.BatchItemResult{ID: id, OK: false, Code: string(apperrors.CodeValidationFailed), Message: "umodel element id is required"})
+			continue
+		}
+		rows, err := runRows(conn, `MATCH (n:umodel_node {key: $key}) RETURN n.key AS key LIMIT 1;`, map[string]any{"key": id})
+		if err != nil {
+			return model.WriteResult{}, err
+		}
+		if len(rows) == 0 {
+			items = append(items, model.BatchItemResult{ID: id, OK: false, Code: string(apperrors.CodeNotFound), Message: "umodel element not found"})
+			continue
+		}
+		res, err := conn.Execute(stmt, map[string]any{"key": id})
+		if err != nil {
+			return model.WriteResult{}, err
+		}
+		res.Close()
+		items = append(items, model.BatchItemResult{ID: id, OK: true})
+	}
+	return summarizeItems(items), nil
 }
 
 func (p *Provider) GetUModelSnapshot(ctx context.Context, req model.UModelSnapshotRequest) (model.UModelSnapshot, error) {
@@ -244,15 +281,7 @@ func (p *Provider) QueryTopo(ctx context.Context, plan model.TopoQueryPlan) (mod
 		return model.QueryResult{}, err
 	}
 	if plan.GraphCall != nil && plan.GraphCall.Name == "cypher" {
-		if err := validateReadOnlyCypher(plan.GraphCall.Cypher); err != nil {
-			return model.QueryResult{}, err
-		}
-		rows, err := runRows(conn, plan.GraphCall.Cypher, plan.Params)
-		if err != nil {
-			return model.QueryResult{}, err
-		}
-		limit := boundedLimit(plan.Limit)
-		return model.QueryResult{Columns: columnsFromRows(rows), Rows: limitResultRows(rows, limit), Page: model.PageRequest{Limit: limit}}, nil
+		return p.queryControlledCypher(conn, plan)
 	}
 	rows, err := runRows(conn, fmt.Sprintf(`MATCH (s:entity)-[r:topo]->(d:entity) WHERE r.deleted = false RETURN s.entity_key AS src, r.relation_type AS relation, d.entity_key AS dest, r.method AS method, r.first_observed_time AS first_observed_time, r.last_observed_time AS last_observed_time, r.keep_alive_seconds AS keep_alive_seconds, r.deleted AS deleted, r.properties AS properties ORDER BY r.relation_key LIMIT %d;`, ladybugCapabilities().MaxLimit), nil)
 	if err != nil {
@@ -271,6 +300,76 @@ func (p *Provider) QueryTopo(ctx context.Context, plan model.TopoQueryPlan) (mod
 		}
 	}
 	return model.QueryResult{Columns: []string{"src", "relation", "dest", "__relation_type__", "__deleted__"}, Rows: out, Page: model.PageRequest{Limit: limit}}, nil
+}
+
+func (p *Provider) queryControlledCypher(conn *lbug.Connection, plan model.TopoQueryPlan) (model.QueryResult, error) {
+	if err := validateReadOnlyCypher(plan.GraphCall.Cypher); err != nil {
+		return model.QueryResult{}, err
+	}
+	graph, err := p.cypherGraph(conn, plan)
+	if err != nil {
+		return model.QueryResult{}, err
+	}
+	limit := boundedLimit(plan.Limit)
+	result, err := cypher.Execute(plan.GraphCall.Cypher, graph, plan.Params, cypher.Options{Limit: limit})
+	if err != nil {
+		return model.QueryResult{}, err
+	}
+	return model.QueryResult{
+		Columns: result.Columns,
+		Rows:    result.Rows,
+		Page:    model.PageRequest{Limit: result.Limit},
+	}, nil
+}
+
+func (p *Provider) cypherGraph(conn *lbug.Connection, plan model.TopoQueryPlan) (cypher.Graph, error) {
+	entityRows, err := runRows(conn, fmt.Sprintf(`MATCH (e:entity) WHERE e.deleted = false RETURN e.entity_key AS entity_key, e.domain AS domain, e.entity_type AS entity_type, e.entity_id AS entity_id, e.method AS method, e.first_observed_time AS first_observed_time, e.last_observed_time AS last_observed_time, e.keep_alive_seconds AS keep_alive_seconds, e.deleted AS deleted, e.properties AS properties ORDER BY e.entity_key LIMIT %d;`, ladybugCapabilities().MaxLimit), nil)
+	if err != nil {
+		return cypher.Graph{}, err
+	}
+	nodes := map[string]cypher.Node{}
+	for _, row := range entityRows {
+		payload := entityPayloadFromRow(row)
+		if !entityMatches(payload, plan) {
+			continue
+		}
+		key := graphstore.EntityKey(payload)
+		nodes[key] = cypher.Node{
+			ID:         key,
+			Labels:     entityLabels(payload),
+			Properties: cloneMap(map[string]any(payload)),
+		}
+	}
+
+	relationRows, err := runRows(conn, fmt.Sprintf(`MATCH (s:entity)-[r:topo]->(d:entity) WHERE r.deleted = false RETURN s.entity_key AS src, r.relation_type AS relation, d.entity_key AS dest, r.method AS method, r.first_observed_time AS first_observed_time, r.last_observed_time AS last_observed_time, r.keep_alive_seconds AS keep_alive_seconds, r.deleted AS deleted, r.properties AS properties ORDER BY r.relation_key LIMIT %d;`, ladybugCapabilities().MaxLimit), nil)
+	if err != nil {
+		return cypher.Graph{}, err
+	}
+	edges := []cypher.Edge{}
+	for _, row := range relationRows {
+		payload := relationPayloadFromRow(row)
+		if !relationMatches(payload, plan) {
+			continue
+		}
+		src := relationEndpoint(payload, "src")
+		dest := relationEndpoint(payload, "dest")
+		srcKey := graphstore.EntityKey(src)
+		destKey := graphstore.EntityKey(dest)
+		if _, ok := nodes[srcKey]; !ok {
+			nodes[srcKey] = cypher.Node{ID: srcKey, Labels: entityLabels(src), Properties: cloneMap(map[string]any(src))}
+		}
+		if _, ok := nodes[destKey]; !ok {
+			nodes[destKey] = cypher.Node{ID: destKey, Labels: entityLabels(dest), Properties: cloneMap(map[string]any(dest))}
+		}
+		edges = append(edges, cypher.Edge{
+			ID:         graphstore.RelationKey(payload),
+			From:       srcKey,
+			To:         destKey,
+			Type:       asString(payload["__relation_type__"]),
+			Properties: cloneMap(map[string]any(payload)),
+		})
+	}
+	return cypher.Graph{Nodes: nodes, Edges: edges}, nil
 }
 
 func (p *Provider) Capabilities(ctx context.Context) (model.GraphStoreCapabilities, error) {
@@ -299,10 +398,10 @@ func (p *Provider) openWorkspaceLocked(workspace model.WorkspaceMetadata) error 
 		return fmt.Errorf("workspace id is required")
 	}
 	dbPath := ladybugPath(p.root, workspace)
-	if err := os.MkdirAll(dbPath, 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dbPath), 0o755); err != nil {
 		return err
 	}
-	db, err := lbug.OpenDatabase(dbPath, lbug.DefaultSystemConfig())
+	db, err := lbug.OpenDatabase(dbPath, defaultSystemConfig())
 	if err != nil {
 		return err
 	}
@@ -332,6 +431,13 @@ func (p *Provider) ensureSchemaLocked(workspace string) error {
 		res.Close()
 	}
 	return nil
+}
+
+func defaultSystemConfig() lbug.SystemConfig {
+	config := lbug.DefaultSystemConfig()
+	config.BufferPoolSize = 256 * 1024 * 1024
+	config.MaxNumThreads = 4
+	return config
 }
 
 func executeEntityUpsert(conn *lbug.Connection, stmt *lbug.PreparedStatement, payload model.EntityPayload) error {
@@ -383,6 +489,19 @@ func relationEndpoint(payload model.RelationPayload, side string) model.EntityPa
 	entity["__entity_type__"] = payload["__"+side+"_entity_type__"]
 	entity["__entity_id__"] = payload["__"+side+"_entity_id__"]
 	return entity
+}
+
+func entityLabels(payload model.EntityPayload) []string {
+	domain := asString(payload["__domain__"])
+	entityType := asString(payload["__entity_type__"])
+	labels := []string{}
+	if entityType != "" {
+		labels = append(labels, entityType)
+	}
+	if domain != "" && entityType != "" {
+		labels = append(labels, domain+"@"+entityType)
+	}
+	return labels
 }
 
 func entityPayloadFromRow(row map[string]any) model.EntityPayload {
@@ -666,6 +785,18 @@ func limitResultRows(rows []map[string]any, limit int) []map[string]any {
 		return rows
 	}
 	return rows[:limit]
+}
+
+func summarizeItems(items []model.BatchItemResult) model.WriteResult {
+	result := model.WriteResult{Items: items}
+	for _, item := range items {
+		if item.OK {
+			result.Accepted++
+		} else {
+			result.Failed++
+		}
+	}
+	return result
 }
 
 func ladybugPath(root string, workspace model.WorkspaceMetadata) string {

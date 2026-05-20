@@ -112,9 +112,9 @@ func (s *Service) ReadResource(ctx context.Context, workspace string, req model.
 			"workspace": workspace,
 			"templates": []map[string]any{
 				{"id": "list-umodel", "query": ".umodel with(kind='entity_set') | limit 20"},
-				{"id": "find-entity", "query": ".entity with(domain='devops', name='devops.service', query=$query) | limit 20"},
+				{"id": "find-entity", "query": ".entity with(domain='devops', name='devops.service', query=$query) | limit 20", "parameters": map[string]any{"query": "checkout"}},
 				{"id": "topology-neighbors", "query": ".topo | graph-call getNeighborNodes('full', 2, [(:\"devops@devops.service\" {__entity_id__: '10000000000000000000000000000101'})]) | limit 20"},
-				{"id": "topology-cypher", "query": ".topo | graph-call cypher(`MATCH (n) RETURN n LIMIT 20`)"},
+				{"id": "topology-cypher", "query": ".topo | graph-call cypher(`MATCH (src)-[r]->(dest) RETURN properties(src) AS src, properties(r) AS relation, properties(dest) AS dest LIMIT 20`)"},
 			},
 		}
 	case "tool-metadata":
@@ -416,7 +416,7 @@ func defaultExamples() []string {
 		".umodel with(kind='entity_set') | limit 20",
 		".entity with(domain='devops', name='devops.service', query='checkout') | limit 20",
 		".topo | graph-call getNeighborNodes('full', 2, [(:\"devops@devops.service\" {__entity_id__: '10000000000000000000000000000101'})]) | limit 20",
-		".topo | graph-call cypher(`MATCH (n) RETURN n LIMIT 20`)",
+		".topo | graph-call cypher(`MATCH (src)-[r]->(dest) RETURN properties(src) AS src, properties(r) AS relation, properties(dest) AS dest LIMIT 20`)",
 	}
 }
 

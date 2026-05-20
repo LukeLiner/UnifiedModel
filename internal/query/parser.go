@@ -56,7 +56,7 @@ func ParseAST(query string) (AST, error) {
 func planFromAST(req model.QueryRequest, ast AST) model.QueryPlan {
 	filters := make(map[string]any, len(ast.Filters))
 	for key, value := range ast.Filters {
-		filters[key] = value
+		filters[key] = resolveParamValue(value, req.Params)
 	}
 
 	pipeline := append([]model.QueryPipelineOperator(nil), ast.Operators...)
@@ -67,7 +67,13 @@ func planFromAST(req model.QueryRequest, ast AST) model.QueryPlan {
 	var graphCall *model.GraphCallPlan
 	topk := intFilter(filters["topk"])
 
-	for _, operator := range pipeline {
+	for idx, operator := range pipeline {
+		if operator.Predicate != nil {
+			predicate := *operator.Predicate
+			predicate.Value = resolveParamValue(predicate.Value, req.Params)
+			pipeline[idx].Predicate = &predicate
+			operator.Predicate = &predicate
+		}
 		operators = append(operators, operator.Name)
 		if operator.Predicate != nil {
 			predicates = append(predicates, *operator.Predicate)
@@ -117,6 +123,52 @@ func planFromAST(req model.QueryRequest, ast AST) model.QueryPlan {
 		Depth:      depth,
 		TimeoutMS:  req.TimeoutMS,
 	}
+}
+
+func resolveParamValue(value any, params map[string]any) any {
+	switch typed := value.(type) {
+	case string:
+		name, ok := paramName(typed)
+		if !ok || params == nil {
+			return typed
+		}
+		if replacement, exists := params[name]; exists {
+			return replacement
+		}
+		return typed
+	case []string:
+		out := make([]string, 0, len(typed))
+		for _, item := range typed {
+			resolved := resolveParamValue(item, params)
+			text, ok := resolved.(string)
+			if !ok {
+				return typed
+			}
+			out = append(out, text)
+		}
+		return out
+	case []any:
+		out := make([]any, 0, len(typed))
+		for _, item := range typed {
+			out = append(out, resolveParamValue(item, params))
+		}
+		return out
+	default:
+		return value
+	}
+}
+
+func paramName(value string) (string, bool) {
+	if !strings.HasPrefix(value, "$") || len(value) == 1 {
+		return "", false
+	}
+	name := strings.TrimPrefix(value, "$")
+	for _, r := range name {
+		if !(unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_') {
+			return "", false
+		}
+	}
+	return name, true
 }
 
 func detectSource(queryText string) (string, error) {

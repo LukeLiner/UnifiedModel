@@ -76,6 +76,41 @@ func TestExecuteAggregation(t *testing.T) {
 	}
 }
 
+func TestExecutePropertiesCoversNodeAndEdgeAttributes(t *testing.T) {
+	result, err := Execute(
+		"match (src:`apm@apm.service` {__entity_id__: $src})-[r:calls]->(dest) return properties(src) as src, properties(r) as relation, properties(dest) as dest, labels(src) as src_labels, id(r) as relation_id",
+		testGraph(),
+		map[string]any{"src": cartID},
+		Options{Limit: 20},
+	)
+	if err != nil {
+		t.Fatalf("execute property query: %v", err)
+	}
+	if len(result.Rows) != 1 {
+		t.Fatalf("expected one property row, got %+v", result.Rows)
+	}
+	row := result.Rows[0]
+	src, ok := row["src"].(map[string]any)
+	if !ok || src["__entity_id__"] != cartID || src["display_name"] != "cart" {
+		t.Fatalf("unexpected source properties: %#v", row["src"])
+	}
+	relation, ok := row["relation"].(map[string]any)
+	if !ok || relation["__relation_type__"] != "calls" || relation["latency_ms"] != 12 {
+		t.Fatalf("unexpected relation properties: %#v", row["relation"])
+	}
+	dest, ok := row["dest"].(map[string]any)
+	if !ok || dest["__entity_id__"] != checkoutID || dest["display_name"] != "checkout" {
+		t.Fatalf("unexpected destination properties: %#v", row["dest"])
+	}
+	labels, ok := row["src_labels"].([]string)
+	if !ok || len(labels) != 2 || labels[0] != "apm.service" || labels[1] != "apm@apm.service" {
+		t.Fatalf("unexpected source labels: %#v", row["src_labels"])
+	}
+	if row["relation_id"] != "cart-calls-checkout" {
+		t.Fatalf("unexpected relation id: %#v", row["relation_id"])
+	}
+}
+
 func TestValidateReadOnlyCypher(t *testing.T) {
 	if err := ValidateReadOnly("MATCH (n) SET n.name = 'bad' RETURN n"); !apperrors.IsCode(err, apperrors.CodeQueryPlanError) {
 		t.Fatalf("expected mutation rejection, got %v", err)

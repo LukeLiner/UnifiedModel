@@ -23,9 +23,6 @@ func buildExplain(plan model.QueryPlan, caps model.GraphStoreCapabilities, healt
 	if plan.GraphCall != nil && plan.GraphCall.Name == "cypher" && caps.ControlledCypher {
 		explain.CypherDialect = "ladybug"
 		explain.CypherEngine = "go"
-		if provider == "local.ladybug" {
-			explain.CypherEngine = "ladybug"
-		}
 	}
 	return explain
 }

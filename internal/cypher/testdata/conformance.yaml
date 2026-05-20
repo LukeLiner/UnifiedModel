@@ -46,3 +46,32 @@
     - service: 54013ba69c196820e56801f1ef5aad54
       relation_count: 1
       relation_types: [calls]
+- name: full node and relationship properties
+  query: |
+    MATCH (src:`apm@apm.service` {__entity_id__: $src})-[r:calls]->(dest)
+    RETURN properties(src) AS src,
+           properties(r) AS relation,
+           properties(dest) AS dest,
+           labels(src) AS src_labels,
+           id(r) AS relation_id
+  params:
+    src: 54013ba69c196820e56801f1ef5aad54
+  columns: [src, relation, dest, src_labels, relation_id]
+  rows:
+    - src:
+        __domain__: apm
+        __entity_type__: apm.service
+        __entity_id__: 54013ba69c196820e56801f1ef5aad54
+        __deleted__: false
+        display_name: cart
+      relation:
+        __relation_type__: calls
+        latency_ms: 12
+      dest:
+        __domain__: apm
+        __entity_type__: apm.service
+        __entity_id__: 177627f91af678a9b03e993f1a91917f
+        __deleted__: false
+        display_name: checkout
+      src_labels: [apm.service, apm@apm.service]
+      relation_id: cart-calls-checkout

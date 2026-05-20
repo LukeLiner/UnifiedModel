@@ -1343,7 +1343,7 @@ func evalFunction(name, inner string, r row, params map[string]any) (any, error)
 		}
 		return nil, nil
 	case "labels":
-		value, err := evalExpr(args[0], r, params)
+		value, err := evalFunctionTarget(args[0], r, params)
 		if err != nil {
 			return nil, err
 		}
@@ -1352,7 +1352,7 @@ func evalFunction(name, inner string, r row, params map[string]any) (any, error)
 		}
 		return []string{}, nil
 	case "properties":
-		value, err := evalExpr(args[0], r, params)
+		value, err := evalFunctionTarget(args[0], r, params)
 		if err != nil {
 			return nil, err
 		}
@@ -1364,7 +1364,7 @@ func evalFunction(name, inner string, r row, params map[string]any) (any, error)
 		}
 		return nil, nil
 	case "id":
-		value, err := evalExpr(args[0], r, params)
+		value, err := evalFunctionTarget(args[0], r, params)
 		if err != nil {
 			return nil, err
 		}
@@ -1390,6 +1390,14 @@ func evalFunction(name, inner string, r row, params map[string]any) (any, error)
 	default:
 		return nil, apperrors.WithDetails(apperrors.CodeQueryPlanError, "unsupported cypher function", map[string]string{"function": name})
 	}
+}
+
+func evalFunctionTarget(expr string, r row, params map[string]any) (any, error) {
+	expr = strings.TrimSpace(expr)
+	if value, ok := r[expr]; ok {
+		return value, nil
+	}
+	return evalExpr(expr, r, params)
 }
 
 func propertyValue(value any, property string) any {

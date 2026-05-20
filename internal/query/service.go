@@ -57,7 +57,7 @@ func (s *Service) Examples(ctx context.Context) ([]string, error) {
 		".entity with(domain='k8s', name='k8s.workload', query='checkout', topk=20)",
 		".topo | graph-call getNeighborNodes('full', 2, [(:\"devops@devops.service\" {__entity_id__: '10000000000000000000000000000101'})]) | limit 20",
 		".topo | graph-call getDirectRelations([(:\"devops@devops.service\" {__entity_id__: '10000000000000000000000000000101'})]) | limit 20",
-		".topo | graph-call cypher(`MATCH (n) RETURN n LIMIT 20`)",
+		".topo | graph-call cypher(`MATCH (src)-[r]->(dest) RETURN properties(src) AS src, properties(r) AS relation, properties(dest) AS dest LIMIT 20`)",
 	}, nil
 }
 

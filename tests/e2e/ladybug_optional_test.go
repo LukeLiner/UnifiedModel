@@ -23,8 +23,8 @@ func TestLadybugOptionalBusinessFlowPersistsAcrossRestart(t *testing.T) {
 	e2ePost(t, server.URL+"/api/v1/workspaces", map[string]any{"id": "ladybug-demo"})
 	e2ePost(t, server.URL+"/api/v1/umodel/ladybug-demo/elements", map[string]any{"elements": []map[string]any{{
 		"kind":   "entity_set",
-		"domain": "apm",
-		"name":   "apm.service",
+		"domain": "devops",
+		"name":   "devops.service",
 	}}})
 	e2ePost(t, server.URL+"/api/v1/entitystore/ladybug-demo/entities:write", map[string]any{"entities": []map[string]any{
 		entityPayload("54013ba69c196820e56801f1ef5aad54", "Update", 100, 200, map[string]any{"display_name": "cart"}),
@@ -34,7 +34,7 @@ func TestLadybugOptionalBusinessFlowPersistsAcrossRestart(t *testing.T) {
 	}})
 
 	if rows := e2eRows(t, e2ePost(t, server.URL+"/api/v1/query/ladybug-demo/execute", map[string]any{
-		"query": ".umodel with(kind='entity_set', domain='apm', name='apm.service') | limit 5",
+		"query": ".umodel with(kind='entity_set', domain='devops', name='devops.service') | limit 5",
 	})); len(rows) != 1 {
 		t.Fatalf("expected ladybug umodel row before restart, got %+v", rows)
 	}
@@ -53,13 +53,13 @@ func TestLadybugOptionalBusinessFlowPersistsAcrossRestart(t *testing.T) {
 	}()
 
 	umodelRows := e2eRows(t, e2ePost(t, reopenedServer.URL+"/api/v1/query/ladybug-demo/execute", map[string]any{
-		"query": ".umodel with(kind='entity_set', domain='apm', name='apm.service') | limit 5",
+		"query": ".umodel with(kind='entity_set', domain='devops', name='devops.service') | limit 5",
 	}))
 	if len(umodelRows) != 1 {
 		t.Fatalf("expected persisted ladybug umodel row after restart, got %+v", umodelRows)
 	}
 	entityRows := e2eRows(t, e2ePost(t, reopenedServer.URL+"/api/v1/query/ladybug-demo/execute", map[string]any{
-		"query": ".entity with(domain='apm', name='apm.*', ids=['54013ba69c196820e56801f1ef5aad54'], query='cart') | limit 5",
+		"query": ".entity with(domain='devops', name='devops.*', ids=['54013ba69c196820e56801f1ef5aad54'], query='cart') | limit 5",
 	}))
 	if len(entityRows) != 1 || entityRows[0]["__entity_id__"] != "54013ba69c196820e56801f1ef5aad54" {
 		t.Fatalf("expected persisted ladybug entity row after restart, got %+v", entityRows)

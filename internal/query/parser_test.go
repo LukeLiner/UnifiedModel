@@ -55,6 +55,33 @@ func TestParseG4WithParams(t *testing.T) {
 	}
 }
 
+func TestParseResolvesRequestParameters(t *testing.T) {
+	plan, err := Parse(model.QueryRequest{
+		Query: ".entity with(domain=$domain, name='apm.service', ids=[$id], query=$query) | where display_name = $display_name | limit 5",
+		Params: map[string]any{
+			"domain":       "apm",
+			"id":           "54013ba69c196820e56801f1ef5aad54",
+			"query":        "cart",
+			"display_name": "cart service",
+		},
+	})
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	if plan.Filters["domain"] != "apm" || plan.Filters["query"] != "cart" {
+		t.Fatalf("unexpected parameterized filters: %#v", plan.Filters)
+	}
+	if !reflect.DeepEqual(plan.Filters["ids"], []string{"54013ba69c196820e56801f1ef5aad54"}) {
+		t.Fatalf("unexpected parameterized ids: %#v", plan.Filters["ids"])
+	}
+	if len(plan.Predicates) != 1 || plan.Predicates[0].Value != "cart service" {
+		t.Fatalf("unexpected parameterized predicate: %+v", plan.Predicates)
+	}
+	if plan.Pipeline[1].Predicate == nil || plan.Pipeline[1].Predicate.Value != "cart service" {
+		t.Fatalf("pipeline predicate should keep resolved parameter: %+v", plan.Pipeline)
+	}
+}
+
 func TestParseEntityFiltersTopKAndIDs(t *testing.T) {
 	plan, err := Parse(model.QueryRequest{Query: ".entity with(domain='apm', name='apm.service', ids=['54013ba69c196820e56801f1ef5aad54','177627f91af678a9b03e993f1a91917f'], query='shop', topk=50)"})
 	if err != nil {

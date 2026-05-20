@@ -58,6 +58,17 @@ Common reads:
 - Inspect object properties.
 - Feed object IDs into topology queries.
 
+Agent and REST callers can bind named parameters into `with(...)` filters and `where` predicates:
+
+```json
+{
+  "query": ".entity with(domain='devops', name='devops.service', query=$query) | limit 20",
+  "parameters": {
+    "query": "checkout"
+  }
+}
+```
+
 ## `.topo`
 
 `.topo` reads runtime topology relations.
@@ -66,7 +77,15 @@ Common reads:
 go run ./cmd/umctl --addr http://localhost:8080 query run demo ".topo | graph-call getDirectRelations([(:\"devops@devops.service\" {__entity_id__: '10000000000000000000000000000101'})]) | project src,relation,dest | limit 20"
 ```
 
-`.topo` supports graph-call style topology operations. The local `memory` and `file.memory` providers support controlled read-only Cypher-compatible graph calls through the pure Go engine. The optional `local.ladybug` provider supports Ladybug-backed graph execution when built with `-tags ladybug` and a local Ladybug runtime.
+`.topo` supports graph-call style topology operations. The `memory`, `file.memory`, and optional `local.ladybug` providers support controlled read-only Cypher-compatible graph calls through the shared Go engine. `local.ladybug` still persists graph data in Ladybug when built with `-tags ladybug` and a local Ladybug runtime.
+
+Cypher can return full entity and relation property maps in one query:
+
+```bash
+go run ./cmd/umctl --addr http://localhost:8080 query run demo ".topo | graph-call cypher(`MATCH (src)-[r]->(dest) RETURN src, r AS relation, dest LIMIT 20`)"
+```
+
+Use `properties(src)`, `properties(r)`, and `properties(dest)` when callers want to make the property-map shape explicit.
 
 ## Common Pipe Operations
 
