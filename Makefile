@@ -2,7 +2,9 @@
 .PHONY: build build-service build-ui build-sdk-go dev quickstart dev-api dev-web deploy serve-ui status stop-all stop-dev stop-deploy test test-service test-ui test-ladybug verify verify-go verify-python verify-java guard ci clean
 
 VENV_PYTHON := .venv/bin/python
-PYTHON ?= $(if $(wildcard $(VENV_PYTHON)),$(VENV_PYTHON),python3)
+CONDA_PYTHON := $(if $(CONDA_PREFIX),$(CONDA_PREFIX)/bin/python)
+VIRTUAL_ENV_PYTHON := $(if $(VIRTUAL_ENV),$(VIRTUAL_ENV)/bin/python)
+PYTHON ?= $(or $(wildcard $(VENV_PYTHON)),$(wildcard $(CONDA_PYTHON)),$(wildcard $(VIRTUAL_ENV_PYTHON)),python3)
 GOCACHE ?= $(CURDIR)/.cache/go-build
 PNPM ?= pnpm
 API_ADDR ?= :8080
