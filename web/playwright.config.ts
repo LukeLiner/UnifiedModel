@@ -15,10 +15,4 @@ export default defineConfig({
       use: { browserName: 'chromium' },
     },
   ],
-  webServer: {
-    command: 'cd .. && make quickstart',
-    url: 'http://localhost:8080/healthz',
-    reuseExistingServer: true,
-    timeout: 30_000,
-  },
 })

@@ -69,6 +69,6 @@ test.describe('Query capability via UI', () => {
 
   test('agent view shows discovery tools', async ({ page }) => {
     await page.locator('text=Agent').click()
-    await expect(page.locator('text=query_spl_execute')).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('strong', { hasText: 'query_spl_execute' }).first()).toBeVisible({ timeout: 10_000 })
   })
 })
