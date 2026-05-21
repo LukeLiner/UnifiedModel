@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test'
 
-const API = 'http://localhost:8080'
+const TOPO_DIRECT = `.topo | graph-call getDirectRelations([(:"devops@devops.service" {__entity_id__: '10000000000000000000000000000101'})]) | project src,relation,dest | limit 20`
 
 test.describe('Query capability via UI', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
-    const demoCard = page.locator('text=demo').first()
+    const demoCard = page.locator('.workspace-id', { hasText: 'demo' }).first()
     await expect(demoCard).toBeVisible({ timeout: 10_000 })
     await demoCard.click()
     await expect(page.locator('text=UModel Explorer')).toBeVisible({ timeout: 5_000 })
@@ -13,7 +13,7 @@ test.describe('Query capability via UI', () => {
 
   test('workspace landing shows demo workspace', async ({ page }) => {
     await page.goto('/')
-    await expect(page.locator('text=demo')).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('.workspace-id', { hasText: 'demo' }).first()).toBeVisible({ timeout: 10_000 })
   })
 
   test('umodel query returns rows', async ({ page }) => {
@@ -44,7 +44,7 @@ test.describe('Query capability via UI', () => {
     await page.locator('text=Query').click()
 
     const textarea = page.locator('textarea').first()
-    await textarea.fill('.topo | graph-call getDirectRelations([(:\\"devops@devops.service\\" {__entity_id__: \'10000000000000000000000000000101\'})]) | project src,relation,dest | limit 20')
+    await textarea.fill(TOPO_DIRECT)
     await page.locator('button:has-text("Execute")').click()
 
     await expect(page.locator('.om-table tbody tr').first()).toBeVisible({ timeout: 10_000 })

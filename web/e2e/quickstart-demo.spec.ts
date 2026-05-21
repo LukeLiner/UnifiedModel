@@ -33,7 +33,7 @@ test.describe('Quickstart demo data validation', () => {
 
   test('topology has relations', async () => {
     const result = await queryAPI(
-      '.topo | graph-call getDirectRelations([(:\\"devops@devops.service\\" {__entity_id__: \'10000000000000000000000000000101\'})]) | limit 10',
+      `.topo | graph-call getDirectRelations([(:"devops@devops.service" {__entity_id__: '10000000000000000000000000000101'})]) | limit 10`,
     )
     expect(result.rows.length).toBeGreaterThan(0)
   })
