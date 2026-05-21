@@ -1,5 +1,5 @@
 .PHONY: help check-env install-env setup setup-ui expand doc example-validate check-manifest
-.PHONY: build build-service build-ui build-sdk-go dev quickstart dev-api dev-web deploy serve-ui status stop-all stop-dev stop-deploy test test-service test-ui test-ladybug verify verify-go verify-python verify-java guard ci clean
+.PHONY: build build-service build-ui build-sdk-go dev quickstart dev-api dev-web deploy serve-ui status stop-all stop-dev stop-deploy test test-service test-ui test-ui-e2e test-capability test-quickstart-health test-ladybug verify verify-go verify-python verify-java guard ci clean
 
 VENV_PYTHON := .venv/bin/python
 CONDA_PYTHON := $(if $(CONDA_PREFIX),$(CONDA_PREFIX)/bin/python)
@@ -117,6 +117,15 @@ test-service:
 test-ui:
 	@PNPM="$(PNPM)" bash ./scripts/env.sh web-build
 
+test-ui-e2e:
+	@cd web && npx playwright test --reporter=list
+
+test-capability:
+	go test -v -run TestCapabilityGate ./tests/integration/
+
+test-quickstart-health:
+	go test -v -run TestQuickstartHealth ./tests/integration/
+
 test-ladybug:
 	@if [ "$$UMODEL_TEST_LADYBUG" != "1" ]; then \
 		echo "Skipping local.ladybug provider and E2E tests; set UMODEL_TEST_LADYBUG=1 and provide liblbug to run them."; \
@@ -163,7 +172,7 @@ test: guard test-service verify
 check-manifest:
 	@$(PYTHON) ./tools/verify/check_manifest.py
 
-ci: guard build-service test-service verify check-manifest example-validate
+ci: guard build-service test-service test-capability test-quickstart-health verify check-manifest example-validate
 	@echo "Local CI passed."
 
 check-env:
