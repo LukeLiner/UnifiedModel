@@ -106,6 +106,7 @@ start_web_server() {
     exit 1
   fi
 
+  cd "${ROOT_DIR}/web"
   exec nohup env UMODEL_API_TARGET="${API_URL}" "${vite_bin}" --host 0.0.0.0 --port "${WEB_PORT}" --strictPort >> "${WEB_LOG}" 2>&1 < /dev/null
 }
 

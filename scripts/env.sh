@@ -74,16 +74,37 @@ check_go() {
 }
 
 check_python() {
-  if ! command_exists "${PYTHON_BIN}"; then
-    echo "ERROR: Python 3.10+ is required; ${PYTHON_BIN} was not found." >&2
-    return 1
+  if command_exists "${PYTHON_BIN}" && \
+     "${PYTHON_BIN}" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1; then
+    echo "OK: $(${PYTHON_BIN} --version 2>&1) ($(command -v ${PYTHON_BIN}))"
+    return 0
   fi
 
-  if ! "${PYTHON_BIN}" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1; then
-    echo "ERROR: Python 3.10+ is required; found $(${PYTHON_BIN} --version 2>&1)." >&2
-    return 1
+  local detail
+  if command_exists "${PYTHON_BIN}"; then
+    detail="found $(${PYTHON_BIN} --version 2>&1) at $(command -v ${PYTHON_BIN})"
+  else
+    detail="${PYTHON_BIN} not found"
   fi
-  echo "OK: $(${PYTHON_BIN} --version 2>&1)"
+
+  local candidate
+  for candidate in \
+    "${CONDA_PREFIX:+${CONDA_PREFIX}/bin/python}" \
+    "${VIRTUAL_ENV:+${VIRTUAL_ENV}/bin/python}" \
+    "python"; do
+    [[ -z "${candidate}" ]] && continue
+    if command_exists "${candidate}" && \
+       "${candidate}" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1; then
+      echo "ERROR: Python 3.10+ is required; ${detail}." >&2
+      echo "       Compatible Python detected at $(command -v ${candidate}) ($(${candidate} --version 2>&1))." >&2
+      echo "       Retry with: make <target> PYTHON=${candidate}" >&2
+      echo "       Or adjust PATH so '${PYTHON_BIN}' resolves to it (an activated env may be behind /usr/bin in PATH)." >&2
+      return 1
+    fi
+  done
+
+  echo "ERROR: Python 3.10+ is required; ${detail}." >&2
+  return 1
 }
 
 check_node() {
