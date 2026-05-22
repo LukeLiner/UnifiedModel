@@ -1,0 +1,20 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "platform.deployment_targets_platform.service"
+  domain: platform
+  display_name:
+    en_us: "Deployment targets Service"
+    zh_cn: "部署指向服务"
+spec:
+  src:
+    domain: platform
+    kind: entity_set
+    name: platform.deployment
+  dest:
+    domain: platform
+    kind: entity_set
+    name: platform.service
+  entity_link_type: targets
