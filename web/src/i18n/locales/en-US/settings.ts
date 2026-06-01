@@ -1,0 +1,15 @@
+export const enUSSettings = {
+  'settings.configJson': 'Config JSON',
+  'settings.deleteWorkspace': 'Delete workspace',
+  'settings.description': 'Description',
+  'settings.labelsJson': 'Labels JSON',
+  'settings.language.description': 'This preference applies immediately across the workspace UI.',
+  'settings.metadata': 'Metadata',
+  'settings.metadata.notLoaded': 'Workspace metadata is not loaded.',
+  'settings.name': 'Name',
+  'settings.preferences': 'Preferences',
+  'settings.replaceConfig': 'replace config',
+  'settings.replaceLabels': 'replace labels',
+  'settings.saved': 'Saved',
+  'settings.title': 'Workspace Settings',
+} as const

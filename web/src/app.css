@@ -183,6 +183,30 @@
   line-height: 1.58;
 }
 
+html[lang="zh-CN"] .landing .landing-copy {
+  gap: 18px;
+}
+
+html[lang="zh-CN"] .landing .landing-copy h1 {
+  max-width: 405px;
+  font-family: var(--om-cjk-font);
+  font-size: 65px;
+  font-weight: 900;
+  line-height: 1.08;
+}
+
+html[lang="zh-CN"] .landing .landing-gradient-text {
+  font-weight: 820;
+}
+
+html[lang="zh-CN"] .landing .landing-copy p {
+  max-width: 350px;
+  font-family: var(--om-cjk-font);
+  font-size: 15.5px;
+  font-weight: 430;
+  line-height: 1.68;
+}
+
 .landing .landing-actions {
   gap: 12px;
 }

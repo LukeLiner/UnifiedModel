@@ -4,6 +4,7 @@ import type { HealthResponse, WorkspaceMetadata } from '../../api/types'
 import { UModelApi } from '../../api/client'
 import { Brand, HealthBadge } from '../../App'
 import { Button, Badge, IconButton } from '../../design/components'
+import { useI18n, type MessageKey } from '../../i18n'
 import { formatError } from '../../lib/json'
 
 const ExplorerPage = lazy(() => import('../explorer/ExplorerPage').then(({ ExplorerPage }) => ({ default: ExplorerPage })))
@@ -46,6 +47,7 @@ export function WorkspaceShell({
   onHealthChange: (health: HealthResponse | null) => void
   onBack: () => void
 }) {
+  const { t } = useI18n()
   const [error, setError] = useState('')
   const [refreshToken, setRefreshToken] = useState(0)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -116,7 +118,7 @@ export function WorkspaceShell({
           </div>
           <IconButton
             className="workspace-collapse-button"
-            label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            label={sidebarCollapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
             onClick={() => setSidebarCollapsed((value) => !value)}
             type="button"
           >
@@ -140,7 +142,7 @@ export function WorkspaceShell({
         <div className="workspace-sidebar-footer">
           <Button className="workspace-back-button" variant="ghost" onClick={onBack}>
             <ArrowLeft size={16} />
-            <span className="workspace-back-label">Workspaces</span>
+            <span className="workspace-back-label">{t('nav.workspaces')}</span>
           </Button>
         </div>
       </aside>
@@ -149,45 +151,45 @@ export function WorkspaceShell({
         {!topbarHidden && (
         <header className="workspace-topbar">
           <div className="row" style={{ minWidth: 0 }}>
-            <Badge tone="indigo">{viewLabel(view)}</Badge>
+            <Badge tone="indigo">{t(viewLabelKey(view))}</Badge>
             <span className="small muted" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {error || workspace?.paths.root || 'Loading workspace metadata...'}
+              {error || workspace?.paths.root || t('settings.metadata.notLoaded')}
             </span>
           </div>
           <div className="row">
             <HealthBadge health={health} />
             <Button variant="ghost" onClick={() => void refresh()}>
               <RefreshCcw size={15} />
-              Refresh
+              {t('common.refresh')}
             </Button>
           </div>
         </header>
         )}
         <main className={`workspace-content ${explorerHost ? 'workspace-content-explorer' : ''}`}>
-          <Suspense fallback={<div className="workspace-page-loading">Loading...</div>}>{page}</Suspense>
+          <Suspense fallback={<div className="workspace-page-loading">{t('common.loading')}</div>}>{page}</Suspense>
         </main>
       </section>
     </div>
   )
 }
 
-function viewLabel(view: WorkspaceView): string {
+function viewLabelKey(view: WorkspaceView): MessageKey {
   switch (view) {
     case 'explorer':
-      return 'UModel Explorer'
+      return 'nav.explorer'
     case 'entityTopo':
-      return 'EntityTopo Explorer'
+      return 'nav.entityTopo'
     case 'query':
-      return 'Query'
+      return 'nav.query'
     case 'imports':
-      return 'Imports'
+      return 'nav.imports'
     case 'agent':
-      return 'Agent'
+      return 'nav.agent'
     case 'settings':
-      return 'Settings'
+      return 'nav.settings'
     case 'docs':
-      return 'API Map'
+      return 'nav.apiMap'
     case 'data':
-      return 'Data'
+      return 'nav.data'
   }
 }

@@ -3,6 +3,7 @@ import { Database, GitBranch, Layers, Network, PanelLeft, Settings2, Sparkles, T
 import { UModelApi } from './api/client'
 import type { HealthResponse, WorkspaceMetadata } from './api/types'
 import { Button, Badge, StatusDot, Field, TextInput } from './design/components'
+import { useI18n } from './i18n'
 import { useLocalStorageState } from './lib/storage'
 import { WorkspaceLanding } from './features/workspaces/WorkspaceLanding'
 import { WorkspaceShell, type WorkspaceView } from './features/workspace/WorkspaceShell'
@@ -13,6 +14,7 @@ const storageKeys = {
 }
 
 export function App() {
+  const { t } = useI18n()
   const [apiBase, setApiBase] = useLocalStorageState(storageKeys.apiBase, '')
   const [selectedWorkspace, setSelectedWorkspace] = useLocalStorageState<string | null>(storageKeys.workspace, null)
   const [health, setHealth] = useState<HealthResponse | null>(null)
@@ -20,6 +22,19 @@ export function App() {
   const [view, setView] = useState<WorkspaceView>('explorer')
 
   const api = useMemo(() => new UModelApi(apiBase), [apiBase])
+  const navItems = useMemo(
+    () => [
+      { value: 'explorer' as const, label: t('nav.explorer'), icon: <GitBranch size={16} /> },
+      { value: 'entityTopo' as const, label: t('nav.entityTopo'), icon: <Network size={16} /> },
+      { value: 'query' as const, label: t('nav.query'), icon: <TerminalSquare size={16} /> },
+      { value: 'imports' as const, label: t('nav.imports'), icon: <UploadCloud size={16} /> },
+      { value: 'agent' as const, label: t('nav.agent'), icon: <Sparkles size={16} /> },
+      { value: 'settings' as const, label: t('nav.settings'), icon: <Settings2 size={16} /> },
+      { value: 'docs' as const, label: t('nav.apiMap'), icon: <Layers size={16} /> },
+      { value: 'data' as const, label: t('nav.data'), icon: <Database size={16} /> },
+    ],
+    [t],
+  )
 
   if (!selectedWorkspace) {
     return (
@@ -58,11 +73,12 @@ export function App() {
 }
 
 export function HealthBadge({ health }: { health: HealthResponse | null }) {
+  const { t } = useI18n()
   if (!health) {
     return (
       <Badge>
         <StatusDot />
-        unknown
+        {t('common.health.unknown')}
       </Badge>
     )
   }
@@ -97,33 +113,24 @@ export function ApiBaseField({
   apiBase: string
   onApiBaseChange: (value: string) => void
 }) {
+  const { t } = useI18n()
   return (
-    <Field label="API endpoint">
+    <Field label={t('landing.api.endpoint')}>
       <TextInput
         value={apiBase}
         onChange={(event) => onApiBaseChange(event.target.value)}
-        placeholder="same origin"
+        placeholder={t('landing.api.placeholder')}
       />
     </Field>
   )
 }
 
 export function SmallReloadButton({ onClick }: { onClick: () => void }) {
+  const { t } = useI18n()
   return (
     <Button variant="ghost" onClick={onClick}>
       <PanelLeft size={15} />
-      Refresh
+      {t('common.refresh')}
     </Button>
   )
 }
-
-const navItems = [
-  { value: 'explorer' as const, label: 'UModel Explorer', icon: <GitBranch size={16} /> },
-  { value: 'entityTopo' as const, label: 'EntityTopo Explorer', icon: <Network size={16} /> },
-  { value: 'query' as const, label: 'Query', icon: <TerminalSquare size={16} /> },
-  { value: 'imports' as const, label: 'Imports & Writes', icon: <UploadCloud size={16} /> },
-  { value: 'agent' as const, label: 'Agent', icon: <Sparkles size={16} /> },
-  { value: 'settings' as const, label: 'Settings', icon: <Settings2 size={16} /> },
-  { value: 'docs' as const, label: 'API Map', icon: <Layers size={16} /> },
-  { value: 'data' as const, label: 'Data Store', icon: <Database size={16} /> },
-]
