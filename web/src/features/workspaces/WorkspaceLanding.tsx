@@ -41,7 +41,7 @@ import {
   Workflow,
 } from 'lucide-react'
 import type { HealthResponse, WorkspaceMetadata } from '../../api/types'
-import { UModelApi } from '../../api/client'
+import { ApiError, UModelApi } from '../../api/client'
 import { formatError, parseJson } from '../../lib/json'
 import { Brand, HealthBadge } from '../../App'
 import { Badge, Button, EmptyState, Field, JsonEditor, Modal, TextInput } from '../../design/components'
@@ -941,7 +941,7 @@ function CreateWorkspaceModal({
       })
       onCreated(workspace)
     } catch (nextError) {
-      setError(formatError(nextError))
+      setError(formatCreateWorkspaceError(nextError, t))
     } finally {
       setSaving(false)
     }
@@ -953,7 +953,7 @@ function CreateWorkspaceModal({
       onClose={onClose}
       footer={
         <div className="toolbar" style={{ width: '100%' }}>
-          <div className="small muted">{error}</div>
+          <div />
           <div className="row">
             <Button variant="ghost" onClick={onClose}>{t('common.cancel')}</Button>
             <Button variant="primary" onClick={() => void submit()} disabled={saving || !id.trim()}>
@@ -965,6 +965,7 @@ function CreateWorkspaceModal({
       }
     >
       <div className="stack">
+        {error && <div className="landing-create-error">{error}</div>}
         <Field label={t('landing.modal.workspaceId')}>
           <TextInput value={id} onChange={(event) => setId(event.target.value)} placeholder="demo" />
         </Field>
@@ -981,4 +982,11 @@ function CreateWorkspaceModal({
       </div>
     </Modal>
   )
+}
+
+function formatCreateWorkspaceError(error: unknown, t: TFunction) {
+  if (error instanceof ApiError && error.code === 'WORKSPACE_TOMBSTONED') {
+    return t('landing.modal.error.tombstoned')
+  }
+  return formatError(error)
 }

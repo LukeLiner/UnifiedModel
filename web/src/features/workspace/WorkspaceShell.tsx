@@ -103,7 +103,7 @@ export function WorkspaceShell({
   }, [api, onBack, onWorkspaceChange, refreshToken, view, workspace, workspaceId])
 
   const explorerHost = view === 'explorer' || view === 'entityTopo'
-  const topbarHidden = explorerHost || view === 'query' || view === 'imports'
+  const topbarHidden = explorerHost || view === 'query' || view === 'imports' || view === 'settings'
 
   return (
     <div className={`workspace-shell app-shell ${sidebarCollapsed ? 'collapsed' : ''} ${explorerHost ? 'explorer-host' : ''}`}>

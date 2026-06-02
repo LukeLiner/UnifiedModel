@@ -27,6 +27,7 @@ export const zhCNLanding = {
   'landing.metrics.workspaces': '工作区',
   'landing.modal.create.title': '创建工作区',
   'landing.modal.description': '描述',
+  'landing.modal.error.tombstoned': '这个工作区 ID 之前删除过，当前被 tombstone 占用。请换一个新的工作区 ID；如果确实要复用，需要先清理本地 metadata 和对应数据。',
   'landing.modal.idHelp': '工作区 ID 必须符合公开 API 规则：小写字母、数字、中划线或下划线。',
   'landing.modal.labelsJson': '标签 JSON',
   'landing.modal.name': '名称',

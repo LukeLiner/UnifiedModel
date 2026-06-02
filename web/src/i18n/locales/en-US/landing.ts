@@ -25,6 +25,7 @@ export const enUSLanding = {
   'landing.metrics.workspaces': 'Workspaces',
   'landing.modal.create.title': 'Create workspace',
   'landing.modal.description': 'Description',
+  'landing.modal.error.tombstoned': 'This workspace ID was previously deleted and is reserved by a tombstone. Use a new workspace ID, or purge the local metadata/data if you really want to reuse it.',
   'landing.modal.idHelp': 'Workspace IDs must match the public API pattern: lowercase letters, numbers, hyphen, or underscore.',
   'landing.modal.labelsJson': 'Labels JSON',
   'landing.modal.name': 'Name',

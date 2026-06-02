@@ -388,6 +388,17 @@ html[lang="zh-CN"] .landing .landing-copy p {
   white-space: nowrap;
 }
 
+.landing-create-error {
+  border: 1px solid #efb9b9;
+  border-radius: var(--om-radius);
+  background: var(--om-red-soft);
+  color: var(--om-red);
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
 .landing .landing-inline-note {
   gap: 7px;
   margin-top: 8px;
