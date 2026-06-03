@@ -11,12 +11,10 @@ const ExplorerPage = lazy(() => import('../explorer/ExplorerPage').then(({ Explo
 const EntityTopoPage = lazy(() => import('../entityTopo/EntityTopoPage').then(({ EntityTopoPage }) => ({ default: EntityTopoPage })))
 const QueryPage = lazy(() => import('../query/QueryPage').then(({ QueryPage }) => ({ default: QueryPage })))
 const ImportsPage = lazy(() => import('../imports/ImportsPage').then(({ ImportsPage }) => ({ default: ImportsPage })))
-const AgentPage = lazy(() => import('../agent/AgentPage').then(({ AgentPage }) => ({ default: AgentPage })))
 const SettingsPage = lazy(() => import('../settings/SettingsPage').then(({ SettingsPage }) => ({ default: SettingsPage })))
 const ApiMapPage = lazy(() => import('../settings/ApiMapPage').then(({ ApiMapPage }) => ({ default: ApiMapPage })))
-const DataStorePage = lazy(() => import('../query/DataStorePage').then(({ DataStorePage }) => ({ default: DataStorePage })))
 
-export type WorkspaceView = 'explorer' | 'entityTopo' | 'query' | 'imports' | 'agent' | 'settings' | 'docs' | 'data'
+export type WorkspaceView = 'explorer' | 'entityTopo' | 'query' | 'imports' | 'settings' | 'docs'
 
 interface NavItem {
   value: WorkspaceView
@@ -81,8 +79,6 @@ export function WorkspaceShell({
         return <QueryPage api={api} workspaceId={workspaceId} />
       case 'imports':
         return <ImportsPage api={api} workspaceId={workspaceId} onChanged={() => setRefreshToken((value) => value + 1)} />
-      case 'agent':
-        return <AgentPage api={api} workspaceId={workspaceId} />
       case 'settings':
         return (
           <SettingsPage
@@ -95,8 +91,6 @@ export function WorkspaceShell({
         )
       case 'docs':
         return <ApiMapPage />
-      case 'data':
-        return <DataStorePage api={api} workspaceId={workspaceId} />
       default:
         return null
     }
@@ -183,13 +177,9 @@ function viewLabelKey(view: WorkspaceView): MessageKey {
       return 'nav.query'
     case 'imports':
       return 'nav.imports'
-    case 'agent':
-      return 'nav.agent'
     case 'settings':
       return 'nav.settings'
     case 'docs':
       return 'nav.apiMap'
-    case 'data':
-      return 'nav.data'
   }
 }

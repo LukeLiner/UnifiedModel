@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Database, GitBranch, Layers, Network, PanelLeft, Settings2, Sparkles, TerminalSquare, UploadCloud } from 'lucide-react'
+import { GitBranch, Layers, Network, PanelLeft, Settings2, TerminalSquare, UploadCloud } from 'lucide-react'
 import { UModelApi } from './api/client'
 import type { HealthResponse, WorkspaceMetadata } from './api/types'
 import { Button, Badge, StatusDot, Field, TextInput } from './design/components'
@@ -29,10 +29,8 @@ export function App() {
       { value: 'entityTopo' as const, label: t('nav.entityTopo'), icon: <Network size={16} /> },
       { value: 'query' as const, label: t('nav.query'), icon: <TerminalSquare size={16} /> },
       { value: 'imports' as const, label: t('nav.imports'), icon: <UploadCloud size={16} /> },
-      { value: 'agent' as const, label: t('nav.agent'), icon: <Sparkles size={16} /> },
       { value: 'settings' as const, label: t('nav.settings'), icon: <Settings2 size={16} /> },
       { value: 'docs' as const, label: t('nav.apiMap'), icon: <Layers size={16} /> },
-      { value: 'data' as const, label: t('nav.data'), icon: <Database size={16} /> },
     ],
     [t],
   )
