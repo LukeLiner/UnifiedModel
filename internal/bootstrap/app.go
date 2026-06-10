@@ -272,10 +272,12 @@ func (a *App) handleCapabilities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"service":         "unified-model",
-		"version":         serviceVersion,
-		"modes_supported": []string{"plan"},
-		"default_mode":    "plan",
+		"service":           "unified-model",
+		"version":           serviceVersion,
+		"modes_supported":   []string{"plan"},
+		"default_mode":      "plan",
+		"formats_supported": []string{"", "agent"},
+		"default_format":    "",
 	})
 }
 
@@ -369,11 +371,28 @@ func (a *App) handleQuery(w http.ResponseWriter, r *http.Request) {
 			req.Mode = mode
 		}
 	}
+	if req.Format == "" {
+		if format := r.URL.Query().Get("format"); format != "" {
+			req.Format = format
+		}
+	}
+	if !req.IncludeSpec {
+		// ?include=spec is all-or-none for v1.1; if we later add granular
+		// expansion (?include=data_link.spec,storage.config), this becomes a
+		// CSV parse.
+		if r.URL.Query().Get("include") == "spec" {
+			req.IncludeSpec = true
+		}
+	}
 	switch action {
 	case "execute":
 		result, err := a.Query.Execute(r.Context(), workspaceID, req)
 		if err != nil {
 			writeError(w, err)
+			return
+		}
+		if req.Format == model.FormatAgent && model.IsAgentPlanResult(result) {
+			writeJSON(w, http.StatusOK, model.AgentPlanPayload(result))
 			return
 		}
 		writeJSON(w, http.StatusOK, model.NewQueryExecuteResponse(result))
