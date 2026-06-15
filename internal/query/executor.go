@@ -610,7 +610,7 @@ func logQueryPlan(plan model.QueryPlan, dataLink model.UModelElement, logSet mod
 		"version":      version,
 		"operation":    "get_logs",
 		"description":  describeLogPlan(logSet, binding.Storage, methodQuery),
-		"next_action":  nextActionForwardToExecutor,
+		"next_action":  nextActionExecuteQuery,
 		"source_query": plan.Query,
 		"data_source": map[string]any{
 			"data_set":     agentDataSetRef(logSet, isAgent, plan.IncludeSpec),
@@ -650,7 +650,7 @@ func metricQueryPlan(plan model.QueryPlan, dataLink model.UModelElement, metricS
 		"version":      version,
 		"operation":    "get_metrics",
 		"description":  describeMetricPlan(metricSet, binding.Storage, metricName, methodQuery, queryType, step),
-		"next_action":  nextActionForwardToExecutor,
+		"next_action":  nextActionExecuteQuery,
 		"source_query": plan.Query,
 		"data_source": map[string]any{
 			"data_set":     agentDataSetRef(metricSet, isAgent, plan.IncludeSpec),
@@ -667,12 +667,11 @@ func metricQueryPlan(plan model.QueryPlan, dataLink model.UModelElement, metricS
 	return queryPlan
 }
 
-// nextActionForwardToExecutor is the canonical "next_action" hint embedded in
-// every plan-mode response. An AI agent that receives this plan should not
-// try to execute the inner storage query itself; the canonical path is to
-// forward the plan to a UModel data executor (e.g. umodel-assistant) that
-// turns it into rows.
-const nextActionForwardToExecutor = "forward_to_executor"
+// nextActionExecuteQuery is the canonical "next_action" hint embedded in every
+// plan-mode response. unified-model returns a plan, not rows: the caller (an AI
+// agent, or any client) is expected to execute the inner storage query in the
+// "query" block against the backend to obtain the data.
+const nextActionExecuteQuery = "execute_query"
 
 // describeMetricPlan returns a one-line human-readable summary of what the
 // metric plan does, so an AI agent can render or relay it to a user without
@@ -695,7 +694,7 @@ func describeMetricPlan(metricSet, storage model.UModelElement, metricName, filt
 		parts = append(parts, fmt.Sprintf("with step %s", step))
 	}
 	parts = append(parts, fmt.Sprintf("(storage: %s/%s).", storage.Kind, storage.Name))
-	parts = append(parts, "Forward this plan to a UModel data executor (e.g. umodel-assistant) to fetch real time series.")
+	parts = append(parts, "The query block is ready to run against that storage; execute it to fetch the time series.")
 	return strings.Join(parts, " ")
 }
 
@@ -707,7 +706,7 @@ func describeLogPlan(logSet, storage model.UModelElement, filter string) string 
 		parts = append(parts, fmt.Sprintf("filtered by [%s]", filter))
 	}
 	parts = append(parts, fmt.Sprintf("(storage: %s/%s).", storage.Kind, storage.Name))
-	parts = append(parts, "Forward this plan to a UModel data executor (e.g. umodel-assistant) to fetch real log rows.")
+	parts = append(parts, "The query block is ready to run against that storage; execute it to fetch the log rows.")
 	return strings.Join(parts, " ")
 }
 

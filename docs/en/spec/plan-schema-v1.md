@@ -90,8 +90,8 @@ The `query` field is a JSON-encoded string. After decoding, the plan must confor
   "mode": "plan",                     // discriminator; always "plan" in plan mode
   "version": "v1",                    // schema version; follows SemVer
   "operation": "get_metrics",         // entity-call method canonical name
-  "description": "Retrieve metric \"request_count\" from MetricSet devops/devops.metric.service with step 30s (storage: prometheus/devops.prometheus.core). Forward this plan to a UModel data executor (e.g. umodel-assistant) to fetch real time series.",
-  "next_action": "forward_to_executor", // recommended next step for an agent
+  "description": "Retrieve metric \"request_count\" from MetricSet devops/devops.metric.service with step 30s (storage: prometheus/devops.prometheus.core). The query block is ready to run against that storage; execute it to fetch the time series.",
+  "next_action": "execute_query",       // recommended next step for an agent
   "source_query": ".entity_set with(...) | entity-call get_metrics(...)", // echo of the original SPL
   "data_source": {
     "data_set":    { "domain", "kind", "name" },
@@ -120,7 +120,7 @@ The `query` field is a JSON-encoded string. After decoding, the plan must confor
 | `version`      | string | yes      | `"v1"` for this spec. Bumps follow SemVer.         |
 | `operation`    | string | yes      | Canonical entity-call name (`get_metrics`, etc.).  |
 | `description`  | string | yes      | One-line human-readable summary of the plan.       |
-| `next_action`  | string | yes      | Recommended next step. Currently `"forward_to_executor"`. |
+| `next_action`  | string | yes      | Recommended next step. Currently `"execute_query"`.       |
 | `source_query` | string | yes      | Echo of the original SPL the caller submitted.     |
 | `data_source`  | object | yes      | Resolved DataSet, Storage, DataLink, StorageLink.  |
 | `params_echo`  | object | yes      | Caller-supplied params, nil/empty stripped.        |
@@ -132,7 +132,7 @@ The `query` field is a JSON-encoded string. After decoding, the plan must confor
 `description`, `next_action`, and `source_query` exist so an AI agent can act on a plan without parsing the inner storage query or re-deriving the user's intent:
 
 - **`description`** — one-line summary the agent can relay back to the user. Includes the metric/log set, filter clause (in `[...]`), and storage info.
-- **`next_action`** — discriminator the agent uses to decide what to do next. `"forward_to_executor"` means: do not try to execute the storage query yourself; hand the plan off to a UModel data executor (e.g. umodel-assistant). Future values may include `"render_to_user"` or `"prompt_for_consent"`.
+- **`next_action`** — discriminator the agent uses to decide what to do next. `"execute_query"` means: run the storage query in the `query` block against the backend to obtain the data. An AI agent or client executes it directly; a PaaS data executor (umodel-assistant) can also fulfill it. Future values may include `"render_to_user"` or `"prompt_for_consent"`.
 - **`source_query`** — the original SPL the caller submitted. Useful in multi-agent pipelines where the agent receiving the plan did not originate the query.
 
 ### `data_source` substructure

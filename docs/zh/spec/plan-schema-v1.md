@@ -90,8 +90,8 @@ Plan 响应被包装在标准的 assistant query 信封里：
   "mode": "plan",                     // 模式判别字段；plan 模式下永远是 "plan"
   "version": "v1",                    // schema 版本，遵循 SemVer
   "operation": "get_metrics",         // entity-call 方法的规范名
-  "description": "Retrieve metric \"request_count\" from MetricSet devops/devops.metric.service with step 30s (storage: prometheus/devops.prometheus.core). Forward this plan to a UModel data executor (e.g. umodel-assistant) to fetch real time series.",
-  "next_action": "forward_to_executor", // 给 agent 的下一步建议
+  "description": "Retrieve metric \"request_count\" from MetricSet devops/devops.metric.service with step 30s (storage: prometheus/devops.prometheus.core). The query block is ready to run against that storage; execute it to fetch the time series.",
+  "next_action": "execute_query",       // 给 agent 的下一步建议
   "source_query": ".entity_set with(...) | entity-call get_metrics(...)", // 原始 SPL 回显
   "data_source": {
     "data_set":    { "domain", "kind", "name" },
@@ -120,7 +120,7 @@ Plan 响应被包装在标准的 assistant query 信封里：
 | `version`     | string | 是   | 当前规范为 `"v1"`，遵循 SemVer。                |
 | `operation`    | string | 是   | entity-call 规范名（`get_metrics` 等）。        |
 | `description`  | string | 是   | 一句话描述 plan 做什么，便于 agent 复述。       |
-| `next_action`  | string | 是   | 给 agent 的下一步建议。当前固定 `"forward_to_executor"`。|
+| `next_action`  | string | 是   | 给 agent 的下一步建议。当前固定 `"execute_query"`。|
 | `source_query` | string | 是   | 调用方提交的原始 SPL 回显。                     |
 | `data_source`  | object | 是   | 解析后的 DataSet / Storage / DataLink / StorageLink。 |
 | `params_echo`  | object | 是   | 调用方实际传入的参数，剔除 nil 与空字符串。     |
@@ -132,7 +132,7 @@ Plan 响应被包装在标准的 assistant query 信封里：
 `description` / `next_action` / `source_query` 这三个字段是给 AI Agent 准备的，避免 agent 自己反向解析存储侧 query 或者推断用户意图：
 
 - **`description`** —— 一句话总结，agent 可以直接复述给用户。包含 metric / log set、过滤条件（用 `[...]` 包裹）以及存储信息。
-- **`next_action`** —— agent 用来判别下一步动作的字段。`"forward_to_executor"` 表示：不要自己执行存储侧 query，把 plan 转发给 UModel data executor（如 umodel-assistant）。后续可能加入 `"render_to_user"`、`"prompt_for_consent"` 等。
+- **`next_action`** —— agent 用来判别下一步动作的字段。`"execute_query"` 表示：对 `query` 块描述的存储侧查询执行取数。可由 AI agent / 客户端直接执行，也可由 PaaS 数据执行器（umodel-assistant）完成。后续可能加入 `"render_to_user"`、`"prompt_for_consent"` 等。
 - **`source_query`** —— 调用方提交的原始 SPL。多 agent 协作场景里，下游 agent 没有用户输入的上下文时靠这个字段恢复。
 
 ### `data_source` 子结构
