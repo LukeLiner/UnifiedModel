@@ -290,7 +290,7 @@ var serviceVersion = "dev"
 
 // handleCapabilities reports what query modes this server supports.
 // unified-model is plan-only by design; umodel-assistant supports plan and data.
-// See docs/en/spec/plan-schema-v1.md for the shared mode protocol.
+// See docs/en/guides/agent-integration.md for the shared mode protocol.
 func (a *App) handleCapabilities(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		writeError(w, apperrors.New(apperrors.CodeInvalidArgument, "method not allowed"))

@@ -4,7 +4,6 @@ import schemaSidebar from './schema-sidebar.json'
 const nav: DefaultTheme.NavItem[] = [
   { text: '指南', link: '/zh/getting-started/quickstart', activeMatch: '/zh/(getting-started|concepts|guides|architecture)/' },
   { text: '参考', link: '/zh/reference/cli', activeMatch: '/zh/reference/' },
-  { text: '规范', link: '/zh/spec/plan-schema-v1', activeMatch: '/zh/spec/' },
   {
     text: '示例',
     items: [
@@ -72,13 +71,6 @@ const sidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Web UI API 映射', link: '/zh/ui-api' },
       { text: 'UI 架构', link: '/zh/ui-architecture' },
       { text: 'SDK 规范', link: '/zh/umodel-sdk-specification' },
-    ],
-  },
-  {
-    text: '规范',
-    collapsed: true,
-    items: [
-      { text: 'Plan Schema v1', link: '/zh/spec/plan-schema-v1' },
     ],
   },
 ]

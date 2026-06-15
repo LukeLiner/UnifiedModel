@@ -121,7 +121,7 @@ umctl query run demo \
 
 The metric plan renders the PromQL `histogram_quantile(0.99, …{service_id="63718b78…"}…)` with the service ID substituted from the entity — the object graph turns "the degraded service" into the exact telemetry query without the agent hand-writing PromQL.
 
-For agent clients, add `?format=agent` to the request (or `mode='agent'`) to get the compact v1.1 envelope — the plan as a top-level object with `data_source` folded to `{ref, type}`. See [Plan Schema v1](../../docs/en/spec/plan-schema-v1.md).
+For agent clients, add `?format=agent` to the request (or `mode='agent'`) to get the compact v1.1 envelope — the plan as a top-level object with `data_source` folded to `{ref, type}`.
 
 ### Step 2: Check upstream callers via topology
 

@@ -4,7 +4,6 @@ import schemaSidebar from './schema-sidebar.json'
 const nav: DefaultTheme.NavItem[] = [
   { text: 'Guide', link: '/en/getting-started/quickstart', activeMatch: '/en/(getting-started|concepts|guides|architecture)/' },
   { text: 'Reference', link: '/en/reference/cli', activeMatch: '/en/reference/' },
-  { text: 'Specs', link: '/en/spec/plan-schema-v1', activeMatch: '/en/spec/' },
   {
     text: 'Demos',
     items: [
@@ -72,13 +71,6 @@ const sidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Web UI API Map', link: '/en/ui-api' },
       { text: 'UI Architecture', link: '/en/ui-architecture' },
       { text: 'SDK Specification', link: '/en/umodel-sdk-specification' },
-    ],
-  },
-  {
-    text: 'Specifications',
-    collapsed: true,
-    items: [
-      { text: 'Plan Schema v1', link: '/en/spec/plan-schema-v1' },
     ],
   },
 ]

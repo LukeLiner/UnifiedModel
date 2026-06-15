@@ -101,7 +101,7 @@ umctl query run demo \
   | entity-call get_metrics('data', 'data.store.metrics', 'connection_pool_usage', step='30s')"
 ```
 
-The plan renders `max(data_store_connection_pool_in_use{target_id="60794de7…"}) / max(data_store_connection_pool_max{…})` — the object graph turned "the store order-svc depends on" into the exact saturation query, no hand-written PromQL. For an agent client, add `?format=agent` to get the compact v1.1 envelope (see [Plan Schema v1](../../docs/en/spec/plan-schema-v1.md)).
+The plan renders `max(data_store_connection_pool_in_use{target_id="60794de7…"}) / max(data_store_connection_pool_max{…})` — the object graph turned "the store order-svc depends on" into the exact saturation query, no hand-written PromQL. For an agent client, add `?format=agent` to get the compact v1.1 envelope.
 
 ### 5. Rule out the layer below
 

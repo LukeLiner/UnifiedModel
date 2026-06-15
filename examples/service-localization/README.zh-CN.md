@@ -101,7 +101,7 @@ umctl query run demo \
   | entity-call get_metrics('data', 'data.store.metrics', 'connection_pool_usage', step='30s')"
 ```
 
-计划会渲染出 `max(data_store_connection_pool_in_use{target_id="60794de7…"}) / max(data_store_connection_pool_max{…})`——对象图把"order-svc 依赖的那个存储"翻译成精确的饱和查询，无需手写 PromQL。Agent 客户端加 `?format=agent` 可拿到紧凑的 v1.1 信封（见 [Plan Schema v1](../../docs/zh/spec/plan-schema-v1.md)）。
+计划会渲染出 `max(data_store_connection_pool_in_use{target_id="60794de7…"}) / max(data_store_connection_pool_max{…})`——对象图把"order-svc 依赖的那个存储"翻译成精确的饱和查询，无需手写 PromQL。Agent 客户端加 `?format=agent` 可拿到紧凑的 v1.1 信封。
 
 ### 5. 排除下面一层
 

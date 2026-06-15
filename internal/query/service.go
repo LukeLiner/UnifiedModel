@@ -8,7 +8,7 @@ import (
 )
 
 // ModePlan is the only query mode supported by unified-model. umodel-assistant
-// additionally supports "data". See docs/en/spec/plan-schema-v1.md for the
+// additionally supports "data". See docs/en/guides/agent-integration.md for the
 // shared mode protocol.
 const ModePlan = "plan"
 
@@ -51,7 +51,7 @@ func normalizeMode(mode string) (string, error) {
 				"supported_modes":    ModePlan,
 				"migration_service":  "umodel-assistant",
 				"migration_action":   "switch_endpoint_to_umodel_assistant",
-				"migration_docs_url": "https://github.com/alibaba/UnifiedModel/blob/main/docs/en/spec/plan-schema-v1.md",
+				"migration_docs_url": "https://github.com/alibaba/UnifiedModel/blob/main/docs/en/guides/agent-integration.md",
 			},
 		)
 	}

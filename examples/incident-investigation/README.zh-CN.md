@@ -121,7 +121,7 @@ umctl query run demo \
 
 指标计划会渲染出 PromQL `histogram_quantile(0.99, …{service_id="63718b78…"}…)`，`service_id` 直接从实体取值——对象图把"那个 degraded 的服务"翻译成精确的可观测查询，Agent 无需手写 PromQL。
 
-Agent 客户端在请求上加 `?format=agent`（或 `mode='agent'`）即可拿到紧凑的 v1.1 信封——计划作为顶层对象返回，`data_source` 折叠为 `{ref, type}`。详见 [Plan Schema v1](../../docs/zh/spec/plan-schema-v1.md)。
+Agent 客户端在请求上加 `?format=agent`（或 `mode='agent'`）即可拿到紧凑的 v1.1 信封——计划作为顶层对象返回，`data_source` 折叠为 `{ref, type}`。
 
 ### 第 2 步：查看上游调用方（拓扑查询）
 

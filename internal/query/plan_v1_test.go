@@ -13,7 +13,7 @@ import (
 // TestPlanV1EnvelopeForGetMetrics verifies that the get_metrics plan carries
 // the v1 envelope fields (mode, version, params_echo) — these are the
 // additive fields the shared plan ↔ data contract relies on. See
-// docs/en/spec/plan-schema-v1.md.
+// docs/en/guides/agent-integration.md.
 func TestPlanV1EnvelopeForGetMetrics(t *testing.T) {
 	ctx := context.Background()
 	store := graphstore.NewMemoryStore()
