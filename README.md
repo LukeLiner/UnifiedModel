@@ -12,7 +12,6 @@ UModel (Unified Model) is a vendor-neutral semantic runtime for enterprise AI, d
 With UModel, you can:
 
 - Author and import model packs that define enterprise objects, operational objects, datasets, links, storage, and topology semantics.
-- Write CMS 2.0 compatible runtime entities and relations.
 - Query models, entities, and topology through one SPL surface: `.umodel`, `.entity`, and `.topo`.
 - Explore the workspace through a local Web UI.
 - Connect agent clients through AgentGateway and MCP.
