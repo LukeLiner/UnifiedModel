@@ -96,7 +96,7 @@ export class UModelApi {
     })
   }
 
-  listUModel(workspace: string, limit = 100): Promise<QueryResult> {
+  listUModel(workspace: string, limit = 1000): Promise<QueryResult> {
     return this.query(workspace, { query: `.umodel | sort name | limit ${limit}`, limit })
   }
 
