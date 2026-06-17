@@ -17,6 +17,12 @@ UModel 支持：
 - 通过 AgentGateway 和 MCP 连接 Agent client。
 - 使用公开 REST、CLI 和 SDK 契约，不依赖服务端内部实现。
 
+## 演示
+
+<video src="https://unifiedmodel-assets.oss-accelerate.aliyuncs.com/QuickStart.mp4" controls width="800"></video>
+
+AI Agent 在 `quickstart-multidomain` workspace 上读取对象图（90 秒）：发现服务、沿跨域拓扑遍历、并通过模型自动生成的查询计划拉取指标和日志，全程不手写一条查询。播放器若未加载，[直接观看视频](https://unifiedmodel-assets.oss-accelerate.aliyuncs.com/QuickStart.mp4)。
+
 ## 为什么需要 UModel
 
 - 加速企业 AI 规模化落地。统一语义标准让 AI 模型理解来自不同平台、不同部门、不同工具和不同领域的数据含义，提升智能运维、智能客服、智能分析、智能预测和 Agent 工作流的落地效率。

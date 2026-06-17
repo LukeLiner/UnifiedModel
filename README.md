@@ -17,6 +17,12 @@ With UModel, you can:
 - Connect agent clients through AgentGateway and MCP.
 - Use public REST, CLI, and SDK contracts without depending on server internals.
 
+## Demo
+
+<video src="https://unifiedmodel-assets.oss-accelerate.aliyuncs.com/QuickStart.mp4" controls width="800"></video>
+
+An AI agent reads across the object graph in the `quickstart-multidomain` workspace (90 seconds): it discovers services, walks cross-domain topology, and pulls metrics and logs through model-scoped query plans, without hand-writing a single query. If the player does not load, [watch the clip directly](https://unifiedmodel-assets.oss-accelerate.aliyuncs.com/QuickStart.mp4).
+
 ## Why UModel
 
 - Accelerate enterprise AI at scale. A unified semantic standard helps AI models understand data meaning across platforms, departments, tools, and domains, improving the path to intelligent operations, customer service, analytics, prediction, and agent workflows.
