@@ -32,9 +32,9 @@ func (e *Executor) Execute(ctx context.Context, workspace string, plan model.Que
 	case ".entity_set":
 		result, err = e.executeEntitySetCall(ctx, workspace, plan)
 	case ".entity":
-		result, err = e.graph.QueryEntities(ctx, model.EntityQueryPlan(plan))
+		result, err = e.graph.QueryEntities(ctx, model.EntityQueryPlan(withFetchLimit(plan)))
 	case ".topo":
-		result, err = e.graph.QueryTopo(ctx, model.TopoQueryPlan(plan))
+		result, err = e.graph.QueryTopo(ctx, model.TopoQueryPlan(withFetchLimit(plan)))
 	default:
 		return model.QueryResult{}, apperrors.New(apperrors.CodeQueryPlanError, "unsupported query source")
 	}
@@ -47,6 +47,101 @@ func (e *Executor) Execute(ctx context.Context, workspace string, plan model.Que
 	result.Columns = columns
 	result.Page = model.PageRequest{Limit: plan.Limit}
 	return result, nil
+}
+
+// Known-field maps for where-predicate pushdown into plan.Filters.
+// Predicates on these fields are pushed to the provider's match function
+// so the fetch limit applies only to matching rows — zero data loss.
+var knownTopoFilterFields = map[string]string{
+	"__relation_type__": "relation_type",
+	"relation":          "relation_type",
+	"src":               "src",
+	"dest":              "dest",
+}
+
+var knownEntityFilterFields = map[string]string{
+	"__domain__":      "domain",
+	"__entity_type__": "name",
+}
+
+// withFetchLimit returns a plan copy adjusted for downstream pipeline
+// operators (where, sort) that process rows after the provider fetch.
+//
+// Two strategies are combined:
+//   - Known-field pushdown: equality predicates on provider-recognized fields
+//     are added to plan.Filters so the provider's match function applies them
+//     before the limit — no data loss regardless of limit.
+//   - Unlimited fetch: for predicates on unknown fields or non-equality
+//     operators, and for sort, the fetch limit is removed (Limit = -1) so the
+//     provider returns all rows and the pipeline filters/sorts the full set.
+func withFetchLimit(plan model.QueryPlan) model.QueryPlan {
+	var fieldMap map[string]string
+	switch plan.Source {
+	case ".topo":
+		fieldMap = knownTopoFilterFields
+	case ".entity":
+		fieldMap = knownEntityFilterFields
+	default:
+		return plan
+	}
+
+	type pushdown struct{ key, value string }
+	var pushdowns []pushdown
+	needsUnlimited := false
+
+	for _, op := range plan.Pipeline {
+		switch {
+		case op.Name == "sort":
+			needsUnlimited = true
+		case op.Name == "where" && op.Predicate != nil:
+			filterKey, known := fieldMap[op.Predicate.Field]
+			if known && (op.Predicate.Op == "=" || op.Predicate.Op == "==") {
+				pushdowns = append(pushdowns, pushdown{filterKey, stringValue(op.Predicate.Value)})
+			} else {
+				needsUnlimited = true
+			}
+		}
+	}
+
+	if len(pushdowns) == 0 && !needsUnlimited {
+		return plan
+	}
+
+	p := plan
+
+	if len(pushdowns) > 0 {
+		filters := make(map[string]any, len(p.Filters)+len(pushdowns))
+		for k, v := range p.Filters {
+			filters[k] = v
+		}
+		for _, pd := range pushdowns {
+			if !filterKeyOccupied(filters, pd.key) {
+				filters[pd.key] = pd.value
+			}
+		}
+		p.Filters = filters
+	}
+
+	if needsUnlimited {
+		p.Limit = -1
+	}
+
+	return p
+}
+
+// filterKeyOccupied returns true if the filter key (or an alias) is already
+// set — prevents pushdown from overriding an explicit with() filter.
+func filterKeyOccupied(filters map[string]any, key string) bool {
+	if filters[key] != nil {
+		return true
+	}
+	switch key {
+	case "relation_type":
+		return filters["type"] != nil
+	case "type":
+		return filters["relation_type"] != nil
+	}
+	return false
 }
 
 func (e *Executor) executeUModel(ctx context.Context, workspace string, plan model.QueryPlan) (model.QueryResult, error) {
