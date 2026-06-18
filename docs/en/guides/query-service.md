@@ -2,7 +2,7 @@
 
 中文：[Query Service 指南](../../zh/guides/query-service.md)
 
-Query Service is the only public read path for UModel definitions, entities, relations, topology, and EntitySet call planning. It accepts SPL strings that start with `.umodel`, `.entity_set`, `.entity`, `.topo`, or `.runbook_set`.
+Query Service is the only public read path for UModel definitions, entities, relations, and topology. It accepts SPL strings that start with `.umodel`, `.entity`, or `.topo`.
 
 ## Why Reads Go Through Query Service
 
@@ -69,19 +69,6 @@ Agent and REST callers can bind named parameters into `with(...)` filters and `w
 }
 ```
 
-## `.entity_set`
-
-`.entity_set` handles EntitySet method calls with UModel Assistant-compatible response data. Metadata/discovery methods return `responseType=2` with `header` and `data`; query-planning methods return `responseType=1` with a downstream query plan in `query`.
-
-```bash
-go run ./cmd/umctl --addr http://localhost:8080 query run demo ".entity_set with(domain='devops', name='devops.service', ids=['10000000000000000000000000000101']) | entity-call __list_method__()"
-go run ./cmd/umctl --addr http://localhost:8080 query run demo ".entity_set with(domain='devops', name='devops.service') | entity-call list_data_set(['metric_set', 'log_set', 'event_set'], true)"
-go run ./cmd/umctl --addr http://localhost:8080 query run demo ".entity_set with(domain='devops', name='devops.service', ids=['10000000000000000000000000000101']) | entity-call get_logs('devops', 'devops.log.service', query='level = \"ERROR\"')"
-go run ./cmd/umctl --addr http://localhost:8080 query run demo ".entity_set with(domain='devops', name='devops.service', ids=['10000000000000000000000000000101']) | entity-call get_metrics('devops', 'devops.metric.service', 'request_count', step='30s')"
-```
-
-The required filters are `domain` and `name`; `ids` is accepted as EntitySet call context. The currently supported methods are `__list_method__`, `list_data_set` (`list_dataset` alias), `get_logs` (`get_log` alias), and `get_metrics` (`get_metric` alias); method parameters are validated against the UModel Assistant signatures. `get_logs` and `get_metrics` parse basic SPL where syntax, map EntitySet fields through `data_link.fields_mapping`, map DataSet fields through `storage_link.fields_mapping`, and return translated storage query plans without querying the storage itself.
-
 ## `.topo`
 
 `.topo` reads runtime topology relations.
@@ -108,7 +95,6 @@ The local query layer supports the operations used by tests, examples, and the W
 - `project` to select output fields.
 - `sort` to order rows.
 - `limit` to bound output.
-- `entity-call` for EntitySet method planning.
 - `graph-call` for topology functions.
 
 Run the built-in examples:
@@ -127,7 +113,7 @@ go run ./cmd/umctl --addr http://localhost:8080 query explain demo ".entity with
 
 Explain output reports:
 
-- Query source: `.umodel`, `.entity_set`, `.entity`, `.topo`, or `.runbook_set`.
+- Query source: `.umodel`, `.entity`, or `.topo`.
 - Active provider.
 - Storage provider.
 - Planned filters and limits.
